@@ -81,6 +81,12 @@
                             <Button Content="重新准备小姐姐" Click="ReFreshSendPackage"></Button>
                         </DockPanel>
                         <DockPanel DockPanel.Dock="Top">
+                            <Label Content="已经出发了多少个小姐姐："></Label>
+                            <Label x:Name="LblSendedBytesCount" Content="0"></Label>
+                            <Label Content="等待出发的小姐姐："></Label>
+                            <Label x:Name="LblWaitForSend"  Content="0"></Label>
+                        </DockPanel>
+                        <DockPanel DockPanel.Dock="Top">
                             <GroupBox Header="准备出发的小姐姐们">
                                 <TextBox x:Name="TxtPreNextPackage" IsReadOnly="True" Background="#f0f0f0"></TextBox>
                             </GroupBox>

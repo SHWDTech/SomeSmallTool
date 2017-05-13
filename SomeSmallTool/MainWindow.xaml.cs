@@ -141,6 +141,8 @@ namespace SomeSmallTool
             }
             TxtSendBytes.AppendText(BinFileHelper.GetPreparedString() + "\r\n\r\n");
             TxtSendBytes.ScrollToEnd();
+            LblSendedBytesCount.Content = BinFileHelper.CountAlreadySend().ToString();
+            LblWaitForSend.Content = BinFileHelper.CountExisted().ToString();
             if (!BinFileHelper.PrepareNextBytes())
             {
                 LblMessages.Content = $"准备小姐姐们的时候遇到点问题。消息是这样的：{BinFileHelper.LastException()}。时间：{DateTime.Now:HH:mm:ss fff}";

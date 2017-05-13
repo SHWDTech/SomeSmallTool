@@ -69,5 +69,17 @@ namespace SomeSmallTool.Process
         }
 
         public static byte[] GetPreparedBytes() => _preparedBytes;
+
+        public static long CountAlreadySend()
+        {
+            if (_currentReader == null) return 0;
+            return _currentReader.BaseStream.Position;
+        }
+
+        public static long CountExisted()
+        {
+            if (_currentReader == null) return 0;
+            return _currentReader.BaseStream.Length - _currentReader.BaseStream.Position - _readLength;
+        }
     }
 }
