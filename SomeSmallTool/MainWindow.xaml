@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="MainWindow" Height="640" Width="800">
+        Title="和小姐姐们玩游戏" Height="640" Width="800" Icon="20170513101058230_easyicon_net_512.ico" >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="320"></RowDefinition>
