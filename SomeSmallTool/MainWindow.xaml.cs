@@ -134,6 +134,11 @@ namespace SomeSmallTool
 
         private void SendPreparedBytes()
         {
+            if (!BinFileHelper.SendBytesPrepared)
+            {
+                LblMessages.Content = $"小姐姐们还没准备好！事情是这样的：{BinFileHelper.GetOperateMessage()}。时间：{DateTime.Now:HH:mm:ss fff}";
+                return;
+            }
             if (!SerialPortHelper.SendBytes(BinFileHelper.GetPreparedBytes()))
             {
                 LblMessages.Content = $"发送失败了，你猜是为什么？消息是这样的：{SerialPortHelper.LastException()}。时间：{DateTime.Now:HH:mm:ss fff}";
@@ -143,11 +148,7 @@ namespace SomeSmallTool
             TxtSendBytes.ScrollToEnd();
             LblSendedBytesCount.Content = BinFileHelper.CountAlreadySend().ToString();
             LblWaitForSend.Content = BinFileHelper.CountExisted().ToString();
-            if (!BinFileHelper.PrepareNextBytes())
-            {
-                LblMessages.Content = $"准备小姐姐们的时候遇到点问题。消息是这样的：{BinFileHelper.LastException()}。时间：{DateTime.Now:HH:mm:ss fff}";
-                return;
-            }
+            BinFileHelper.PrepareNextBytes();
             DisplayPreparedPackageString();
         }
 

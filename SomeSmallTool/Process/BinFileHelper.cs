@@ -20,6 +20,8 @@ namespace SomeSmallTool.Process
 
         private static Exception _operateException;
 
+        public static bool SendBytesPrepared { get; private set; }
+
         public static void PrepareFile(string fileName)
         {
             _currentReader?.Close();
@@ -39,7 +41,8 @@ namespace SomeSmallTool.Process
             if (_currentReader.BaseStream.Position + _readLength > _currentReader.BaseStream.Length)
             {
                 _operateMessage = "已经到头了！别怼了！";
-                return false;
+                SendBytesPrepared = false;
+                return SendBytesPrepared;
             }
             try
             {
@@ -49,13 +52,15 @@ namespace SomeSmallTool.Process
                 _currentReader.Read(fileReadBytes, 0, _readLength);
                 Array.Copy(fileReadBytes, 0, _preparedBytes, _prefixBytes.Length, fileReadBytes.Length);
                 Array.Copy(_tailfixBytes, 0, _preparedBytes, _prefixBytes.Length + _readLength, _tailfixBytes.Length);
-                return true;
+                SendBytesPrepared = true;
+                return SendBytesPrepared;
             }
             catch (Exception ex)
             {
                 _operateException = ex;
                 _operateMessage = "读小姐姐们的时候出事了！";
-                return false;
+                SendBytesPrepared = false;
+                return SendBytesPrepared;
             }
         }
 
@@ -79,7 +84,7 @@ namespace SomeSmallTool.Process
         public static long CountExisted()
         {
             if (_currentReader == null) return 0;
-            return _currentReader.BaseStream.Length - _currentReader.BaseStream.Position - _readLength;
+            return _currentReader.BaseStream.Length - _currentReader.BaseStream.Position;
         }
     }
 }

@@ -88,7 +88,7 @@
                         </DockPanel>
                         <DockPanel DockPanel.Dock="Top">
                             <GroupBox Header="准备出发的小姐姐们">
-                                <TextBox x:Name="TxtPreNextPackage" IsReadOnly="True" Background="#f0f0f0"></TextBox>
+                                <TextBox x:Name="TxtPreNextPackage" IsReadOnly="True" Background="#f0f0f0" TextWrapping="WrapWithOverflow"></TextBox>
                             </GroupBox>
                         </DockPanel>
                     </DockPanel>
@@ -97,7 +97,7 @@
         </Grid>
         <Grid Row="1">
             <GroupBox Header="已经出发的小姐姐们">
-                <TextBox x:Name="TxtSendBytes" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Background="#f0f0f0" FontSize="14"></TextBox>
+                <TextBox x:Name="TxtSendBytes" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="#f0f0f0" FontSize="14"></TextBox>
             </GroupBox>
         </Grid>
         <Grid Row="2">
