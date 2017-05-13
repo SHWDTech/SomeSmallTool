@@ -3,10 +3,101 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SomeSmallTool"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        WindowStartupLocation="CenterScreen"
+        Title="MainWindow" Height="640" Width="800">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="320"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="35"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid Column="0">
+                <GroupBox Header="串口参数">
+                    <StackPanel Orientation="Vertical">
+                        <DockPanel>
+                            <Label Content="端口：" Width="80"></Label>
+                            <ComboBox x:Name="CmbComPort" SelectedValuePath="Value" DisplayMemberPath="Name"></ComboBox>
+                        </DockPanel>
+                        <DockPanel Margin="0, 10, 0, 0">
+                            <Label Content="波特率："  Width="80"></Label>
+                            <ComboBox x:Name="CmbBoundRate" SelectedValuePath="Value" DisplayMemberPath="Name"></ComboBox>
+                        </DockPanel>
+                        <DockPanel Margin="0, 10, 0, 0">
+                            <Label Content="数据位："  Width="80"></Label>
+                            <ComboBox x:Name="CmbDataBit" SelectedValuePath="Value" DisplayMemberPath="Name"></ComboBox>
+                        </DockPanel>
+                        <DockPanel Margin="0, 10, 0, 0">
+                            <Label Content="停止位："  Width="80"></Label>
+                            <ComboBox x:Name="CmbStopBit" SelectedValuePath="Value" DisplayMemberPath="Name"></ComboBox>
+                        </DockPanel>
+                        <DockPanel Margin="0, 10, 0, 0">
+                            <Label Content="校验："  Width="80"></Label>
+                            <ComboBox x:Name="CmbParity" SelectedValuePath="Value" DisplayMemberPath="Name"></ComboBox>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label x:Name="LblPortStatus" Content="啥都没干呢"></Label>
+                        </DockPanel>
+                        <DockPanel Margin="0, 10, 0, 0">
+                            <Button Content="打开/关闭 串口" Height="35" Margin="80, 0, 0, 0" Click="OpenCloseSerialPort"></Button>
+                        </DockPanel>
+                        <DockPanel Margin="0, 10, 0, 0">
+                            <Label Width="80"></Label>
+                            <Button Content="我端口哪儿去了？" Height="35" Click="ReFindSystemSerialPort"></Button>
+                        </DockPanel>
+                    </StackPanel>
+                </GroupBox>
+            </Grid>
+            <Grid Column="1">
+                <GroupBox Header="文件设置">
+                    <DockPanel>
+                        <DockPanel DockPanel.Dock="Top">
+                            <TextBox x:Name="TxtSelectedFile" IsReadOnly="True" Width="360" Height="25" Background="#f0f0f0"></TextBox>
+                            <Button Content="我的小姐姐们呢" Click="SelectBinFile"></Button>
+                        </DockPanel>
+                        <DockPanel Margin="0, 10, 0, 0" DockPanel.Dock="Top">
+                            <Label Content="我每次要从BIN文件里面挑几个小姐姐出来："></Label>
+                            <TextBox x:Name="TxtReadLength" Height="25" TextChanged="OnLittleSisterNumberInput">0</TextBox>
+                        </DockPanel>
+                        <DockPanel Margin="0, 10, 0, 0" DockPanel.Dock="Top">
+                            <Label Content="我从前面进去：" Width="135"></Label>
+                            <TextBox x:Name="TxtPrefix" Height="25"></TextBox>
+                        </DockPanel>
+                        <DockPanel Margin="0, 10, 0, 0" DockPanel.Dock="Top">
+                            <Label Content="我从后面进去：" Width="135"></Label>
+                            <TextBox x:Name="TxtTailfix" Height="25"></TextBox>
+                        </DockPanel>
+                        <DockPanel Margin="0, 10, 0, 0" DockPanel.Dock="Top">
+                            <Button Content="怼她一下" Height="30" Width="75" Margin="0, 0, 25, 0" Click="DoSendOnce"></Button>
+                            <Label Content="隔一会就怼一下："></Label>
+                            <CheckBox VerticalAlignment="Center" Click="AutoSendChecked"></CheckBox>
+                            <TextBox x:Name="TxtSendInterval" Width="100" VerticalContentAlignment="Center" Height="25">1000</TextBox>
+                            <Label Content="ms"></Label>
+                            <Button Content="重新准备小姐姐" Click="ReFreshSendPackage"></Button>
+                        </DockPanel>
+                        <DockPanel DockPanel.Dock="Top">
+                            <GroupBox Header="准备出发的小姐姐们">
+                                <TextBox x:Name="TxtPreNextPackage" IsReadOnly="True" Background="#f0f0f0"></TextBox>
+                            </GroupBox>
+                        </DockPanel>
+                    </DockPanel>
+                </GroupBox>
+            </Grid>
+        </Grid>
+        <Grid Row="1">
+            <GroupBox Header="已经出发的小姐姐们">
+                <TextBox x:Name="TxtSendBytes" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Background="#f0f0f0" FontSize="14"></TextBox>
+            </GroupBox>
+        </Grid>
+        <Grid Row="2">
+            <StatusBar>
+                <Label x:Name="LblMessages" Height="35"></Label>
+            </StatusBar>
+        </Grid>
     </Grid>
 </Window>
