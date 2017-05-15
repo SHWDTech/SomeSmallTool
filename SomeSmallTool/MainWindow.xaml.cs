@@ -175,5 +175,7 @@ namespace SomeSmallTool
         {
             Dispatcher.Invoke(SendPreparedBytes);
         }
+
+        private void ClearSendPackageDisplayArea(object sender, RoutedEventArgs e) => TxtSendBytes.Clear();
     }
 }

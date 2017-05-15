@@ -97,7 +97,13 @@
         </Grid>
         <Grid Row="1">
             <GroupBox Header="已经出发的小姐姐们">
-                <TextBox x:Name="TxtSendBytes" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="#f0f0f0" FontSize="14"></TextBox>
+                <TextBox x:Name="TxtSendBytes" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="#f0f0f0" FontSize="14">
+                    <TextBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="清空数据" Click="ClearSendPackageDisplayArea"></MenuItem>
+                        </ContextMenu>
+                    </TextBox.ContextMenu>
+                </TextBox>
             </GroupBox>
         </Grid>
         <Grid Row="2">
