@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
-using SomeSmallTool.Model;
+using WDTech_Firmware_Serial_Loader.Models;
 
-namespace SomeSmallTool.Process
+namespace WDTech_Firmware_Serial_Loader.Helper
 {
     public class SerialPortHelper
     {
@@ -79,12 +79,12 @@ namespace SomeSmallTool.Process
                     Parity = parity
                 };
                 _currentSerialPort.Open();
-                _operateMessage = @"行了，打开了，你就干吧。";
+                _operateMessage = @"串口已打开。";
             }
             catch (Exception ex)
             {
                 _operateException = ex;
-                _operateMessage = @"搞事情，你又搞事情！";
+                _operateMessage = @"打开串口失败。";
             }
         }
 
@@ -93,12 +93,12 @@ namespace SomeSmallTool.Process
             try
             {
                 _currentSerialPort.Close();
-                _operateMessage = @"OY，关掉啦，下班咯！";
+                _operateMessage = @"串口已关闭。";
             }
             catch (Exception ex)
             {
                 _operateException = ex;
-                _operateMessage = @"搞事情，你又搞事情！";
+                _operateMessage = @"关闭串口失败";
             }
         }
 
@@ -120,7 +120,7 @@ namespace SomeSmallTool.Process
             catch (Exception ex)
             {
                 _operateException = ex;
-                _operateMessage = @"OH MY GOD，小姐姐们出发失败了！";
+                _operateMessage = @"数据发送成功。";
                 return false;
             }
             return true;

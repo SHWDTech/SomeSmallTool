@@ -1,0 +1,132 @@
+﻿<Window x:Class="WDTech_Firmware_Serial_Loader.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        FontSize="14"
+        ResizeMode="CanMinimize"
+        MaxHeight="768"
+        Background="#C3D7F5"
+        MaxWidth="1024"
+        Title="卫东固件升级串口下载器" Height="768" Width="1024">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="22"></RowDefinition>
+            <RowDefinition Height="55"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="35"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Row="0">
+            <Menu FontSize="14">
+                <MenuItem Header="设置">
+                    <MenuItem Header="更新配置信息"></MenuItem>
+                </MenuItem>
+            </Menu>
+        </Grid>
+        <Grid Row="1">
+            <Label Content="这里是LOGO"></Label>
+        </Grid>
+        <Grid Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid Column="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="320"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid Row="0">
+                        <GroupBox Header="串口参数">
+                            <StackPanel Orientation="Vertical">
+                                <DockPanel>
+                                    <Label Content="端口：" Width="80"></Label>
+                                    <ComboBox x:Name="CmbComPort" SelectedValuePath="Value" DisplayMemberPath="Name"></ComboBox>
+                                </DockPanel>
+                                <DockPanel Margin="0, 10, 0, 0">
+                                    <Label Content="波特率："  Width="80"></Label>
+                                    <ComboBox x:Name="CmbBoundRate" SelectedValuePath="Value" DisplayMemberPath="Name"></ComboBox>
+                                </DockPanel>
+                                <DockPanel Margin="0, 10, 0, 0">
+                                    <Label Content="数据位："  Width="80"></Label>
+                                    <ComboBox x:Name="CmbDataBit" SelectedValuePath="Value" DisplayMemberPath="Name"></ComboBox>
+                                </DockPanel>
+                                <DockPanel Margin="0, 10, 0, 0">
+                                    <Label Content="停止位："  Width="80"></Label>
+                                    <ComboBox x:Name="CmbStopBit" SelectedValuePath="Value" DisplayMemberPath="Name"></ComboBox>
+                                </DockPanel>
+                                <DockPanel Margin="0, 10, 0, 0">
+                                    <Label Content="校验："  Width="80"></Label>
+                                    <ComboBox x:Name="CmbParity" SelectedValuePath="Value" DisplayMemberPath="Name"></ComboBox>
+                                </DockPanel>
+                                <DockPanel Margin="0, 10, 0, 0">
+                                    <Button Content="打开/关闭 串口" Height="35" Margin="80, 0, 0, 0" ></Button>
+                                </DockPanel>
+                                <DockPanel Margin="0, 10, 0, 0">
+                                    <Label Width="80"></Label>
+                                    <Button Content="刷新端口" Height="35" Click="ReFindSystemSerialPort"></Button>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                    </Grid>
+                    <Grid Row="1">
+                        <GroupBox Header="下载选项">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="30"></RowDefinition>
+                                    <RowDefinition Height="210"></RowDefinition>
+                                    <RowDefinition Height="*"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <Grid Row="0">
+                                    <Label Content="已加载BIN文件列表："></Label>
+                                </Grid>
+                                <Grid Row="1">
+                                    <ListBox x:Name="LbLoadedBinFile">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <CheckBox Content="{Binding BinFileName}" IsChecked="{Binding IsChecked}"></CheckBox>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Grid>
+                            </Grid>
+                        </GroupBox>
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="55"></RowDefinition>
+                    <RowDefinition Height="365"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid Row="0">
+                    <GroupBox Header="BIN文件选择">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox IsReadOnly="True" Width="480" Background="#f0f0f0" x:Name="TxtSelectBinFileName"></TextBox>
+                            <Button Content="添加BIN文件" Width="90" Margin="10,0,0,0" Click="AddNewBinFile"></Button>
+                            <Button Content="重置选择" Width="90" Margin="10,0,0,0" Click="ClearSelectedFiles"></Button>
+                        </StackPanel>
+                    </GroupBox>
+                </Grid>
+                <Grid Row="1">
+                    <GroupBox Header="已选择BIN文件">
+                        <TabControl x:Name="SelectedBinFileTabControl" Background="#C3D7F5">
+                        </TabControl>
+                    </GroupBox>
+                </Grid>
+                <Grid Row="2">
+                    <GroupBox Header="执行信息"></GroupBox>
+                </Grid>
+            </Grid>
+        </Grid>
+        <Grid Row="3">
+            <StatusBar>
+                <Label x:Name="LblMessage"></Label>
+            </StatusBar>
+        </Grid>
+    </Grid>
+</Window>

@@ -177,5 +177,14 @@ namespace SomeSmallTool
         }
 
         private void ClearSendPackageDisplayArea(object sender, RoutedEventArgs e) => TxtSendBytes.Clear();
+
+        private void SendPackageDisplayAreaAutoClear(object sender, RoutedEventArgs e)
+        {
+            //超过10MB就自动清除。
+            if (TxtSendBytes.Text.Length > 10485760)
+            {
+                TxtSendBytes.Clear();
+            }
+        }
     }
 }

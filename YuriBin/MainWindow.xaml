@@ -1,0 +1,90 @@
+﻿<Window x:Class="YuriBin.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        Title="ゆるゆり" Height="600" Width="800" Icon="bitbug_favicon.ico">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Row="0">
+            <GroupBox Header="文件操作">
+                <StackPanel Orientation="Horizontal" Height="30">
+                    <TextBox x:Name="TxtSelectBinFileName" IsReadOnly="True" Width="450" Background="#f0f0f0" VerticalContentAlignment="Center"></TextBox>
+                    <Button Content="寻找阿卡林" Width="100" Margin="10, 0, 0, 0" Click="SelectBinFile"></Button>
+                    <Button x:Name="BtnCombine"  Content="百合无限好，谁说生不了！" Width="175" Margin="10, 0, 0, 0" Click="WriteBinCfgFile"></Button>
+                </StackPanel>
+            </GroupBox>
+        </Grid>
+        <Grid Row =" 1">
+            <GroupBox DockPanel.Dock="Top" Header="固件信息">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="目标对象：" Width="90"></Label>
+                        <ComboBox Width="150" x:Name="CmbTargetObject" VerticalContentAlignment="Center" SelectedValuePath="Value" DisplayMemberPath="Name"></ComboBox>
+                        <Label Content="YuriBinSize："></Label>
+                        <TextBox IsReadOnly="False" x:Name="TxtYuriBinSize" Background="#f0f0f0" Width="150" VerticalContentAlignment="Center"></TextBox>
+                        <Label Content="更新模式"></Label>
+                        <ComboBox Width="150" x:Name="CmbUpdateMode" VerticalContentAlignment="Center" SelectedValuePath="Value" DisplayMemberPath="Name"></ComboBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0, 10, 0, 0">
+                        <Label Content="固件发布时间：" Width="90"></Label>
+                        <TextBox x:Name="TxtReleashYear" Width="45" VerticalContentAlignment="Center"></TextBox>
+                        <Label Content="年"></Label>
+                        <TextBox x:Name="TxtReleashMonth" Width="30" VerticalContentAlignment="Center"></TextBox>
+                        <Label Content="月"></Label>
+                        <TextBox x:Name="TxtReleashDay" Width="30" VerticalContentAlignment="Center"></TextBox>
+                        <Label Content="日"></Label>
+                        <TextBox x:Name="TxtReleashHour" Width="30" VerticalContentAlignment="Center"></TextBox>
+                        <Label Content="时"></Label>
+                        <TextBox x:Name="TxtReleashMinute" Width="30" VerticalContentAlignment="Center"></TextBox>
+                        <Label Content="分"></Label>
+                        <TextBox x:Name="TxtReleashSecond" Width="30" VerticalContentAlignment="Center"></TextBox>
+                        <Label Content="秒"></Label>
+                        <Button Content="秘技！双马尾之术！" Width="150" Click="CommitCurrentDateTime"></Button>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0, 10, 0, 0">
+                        <Label Content="固件版本号：" Width="90"></Label>
+                        <TextBox x:Name="TxtVersionCodeFirst" PreviewKeyDown="JumpToNext"  Width="90" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False"></TextBox>
+                        <Label Content="."></Label>
+                        <TextBox x:Name="TxtVersionCodeSecond" PreviewKeyDown="JumpToNext" Width="90" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False"></TextBox>
+                        <Label Content="."></Label>
+                        <TextBox x:Name="TxtVersionCodeThird" PreviewKeyDown="JumpToNext" Width="90" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False"></TextBox>
+                        <Label Content="."></Label>
+                        <TextBox x:Name="TxtVersionCodeFourth" PreviewKeyDown="JumpToNext" Width="90" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Margin="0, 10, 0, 0">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="版本描述（总长度233个Yuri）"></Label>
+                            <TextBox x:Name="TxtDescribeUsed" IsReadOnly="True" Width="45" Background="#f0f0f0" VerticalContentAlignment="Center" >1</TextBox>
+                            <Label Content="已使用"></Label>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="0, 10, 0, 0">
+                            <TextBox x:Name="TxtDescribe"  Height="75" TextWrapping="WrapWithOverflow" TextChanged="OnDescChanged"></TextBox>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0, 10, 0, 0">
+                        <Label Content="YuriCheck（BIN文件校验值）：" Width="180"></Label>
+                        <TextBox x:Name="TxtBinCheck"  IsReadOnly="True" Width="150" Background="#f0f0f0" VerticalContentAlignment="Center"></TextBox>
+                        <Label Content="DescCheck（描述信息校验值）：" Width="180"></Label>
+                        <TextBox x:Name="TxtDescCheck" IsReadOnly="True" Width="150" Background="#f0f0f0" VerticalContentAlignment="Center"></TextBox>
+                        <Button Content="预览" Width="75" Margin="10, 0, 0, 0" Height="30" Click="CalcCheckSum"></Button>
+                    </StackPanel>
+                    <GroupBox Header="YuriDescPreview">
+                        <TextBox x:Name="TxtDescPreview" Height="160" IsReadOnly="True" Background="#f0f0f0" TextWrapping="WrapWithOverflow"></TextBox>
+                    </GroupBox>
+                </StackPanel>
+            </GroupBox>
+        </Grid>
+        <Grid Row="2">
+            <StatusBar>
+                <Label x:Name="LblMessage" Height="27"></Label>
+            </StatusBar>
+        </Grid>
+    </Grid>
+</Window>
