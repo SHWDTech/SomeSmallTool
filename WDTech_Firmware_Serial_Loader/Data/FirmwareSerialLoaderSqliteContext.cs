@@ -24,6 +24,9 @@ namespace WDTech_Firmware_Serial_Loader.Data
         public List<ConfigDict> ConfigDicts 
             => GetDbSet<ConfigDict>();
 
+        public List<LocalConfig> LocalConfigs
+            => GetDbSet<LocalConfig>();
+
         #endregion
 
         private List<T> GetDbSet<T>() where T : class, new()
@@ -56,6 +59,17 @@ namespace WDTech_Firmware_Serial_Loader.Data
                     return table.ToListOf<T>().FirstOrDefault();
                 }
             }
+        }
+
+        public int AddOrUpdate<T>(List<T> models) where T : class, new()
+        {
+            var count = 0;
+            foreach (var model in models)
+            {
+                count += AddOrUpdate(model);
+            }
+
+            return count;
         }
 
         public int AddOrUpdate<T>(T model) where T : class, new()

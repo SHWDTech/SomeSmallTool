@@ -75,8 +75,14 @@
     <Compile Include="Data\CheckedBinFile.cs" />
     <Compile Include="Data\DataTableExtensions.cs" />
     <Compile Include="Data\FirmwareSerialLoaderSqliteContext.cs" />
+    <Compile Include="Data\LocalConfig.cs" />
+    <Compile Include="Helper\SerialPortDownloader.cs" />
+    <Compile Include="Models\DownloadConfigs.cs" />
     <Compile Include="UserControl\BinViewer.xaml.cs">
       <DependentUpon>BinViewer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DownloadSetting.xaml.cs">
+      <DependentUpon>DownloadSetting.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -92,6 +98,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="UserControl\BinViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DownloadSetting.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -131,7 +141,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Utility\" />
-    <Folder Include="Views\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FirmwareDownloaderHelper\FirmwareDownloaderHelper.csproj">

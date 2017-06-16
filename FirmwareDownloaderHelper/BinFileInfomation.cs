@@ -31,6 +31,8 @@ namespace FirmwareDownloaderHelper
 
         public string TargetObject => BinFileOptionsHelper.GetUpdateTarget(_targetObject.ToString()); 
 
+        public string FilePath { get; set; }
+
         public int BinFileSize
         {
             get

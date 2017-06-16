@@ -22,6 +22,7 @@
             <Menu FontSize="14">
                 <MenuItem Header="设置">
                     <MenuItem Header="更新配置信息"></MenuItem>
+                    <MenuItem Header="下载功能设置" Click="OpenDownloadSetting"></MenuItem>
                 </MenuItem>
             </Menu>
         </Grid>
@@ -63,7 +64,7 @@
                                     <ComboBox x:Name="CmbParity" SelectedValuePath="Value" DisplayMemberPath="Name"></ComboBox>
                                 </DockPanel>
                                 <DockPanel Margin="0, 10, 0, 0">
-                                    <Button Content="打开/关闭 串口" Height="35" Margin="80, 0, 0, 0" ></Button>
+                                    <Button x:Name="BtnSwitchSerialPortStatus" Content="打开串口" Height="35" Margin="80, 0, 0, 0" Click="SwitchSerialPortStatus"></Button>
                                 </DockPanel>
                                 <DockPanel Margin="0, 10, 0, 0">
                                     <Label Width="80"></Label>
@@ -84,13 +85,19 @@
                                     <Label Content="已加载BIN文件列表："></Label>
                                 </Grid>
                                 <Grid Row="1">
-                                    <ListBox x:Name="LbLoadedBinFile">
+                                    <ListBox x:Name="LbLoadedBinFile" Height="200">
                                         <ListBox.ItemTemplate>
                                             <DataTemplate>
                                                 <CheckBox Content="{Binding BinFileName}" IsChecked="{Binding IsChecked}"></CheckBox>
                                             </DataTemplate>
                                         </ListBox.ItemTemplate>
                                     </ListBox>
+                                </Grid>
+                                <Grid Row="2">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="下载当前BIN文件" Width="125" Click="SendCurrentBinFile"></Button>
+                                        <Button Content="下载选中的BIN文件" Width="125" Margin="35, 0, 0, 0" Click="SendSelectedBinFile"></Button>
+                                    </StackPanel>
                                 </Grid>
                             </Grid>
                         </GroupBox>
@@ -100,7 +107,7 @@
             <Grid Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="55"></RowDefinition>
-                    <RowDefinition Height="365"></RowDefinition>
+                    <RowDefinition Height="385"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
                 </Grid.RowDefinitions>
                 <Grid Row="0">
@@ -114,12 +121,49 @@
                 </Grid>
                 <Grid Row="1">
                     <GroupBox Header="已选择BIN文件">
-                        <TabControl x:Name="SelectedBinFileTabControl" Background="#C3D7F5">
-                        </TabControl>
+                        <StackPanel Orientation="Vertical">
+                            <TabControl x:Name="SelectedBinFileTabControl" Background="#C3D7F5">
+                            </TabControl>
+                        </StackPanel>
                     </GroupBox>
                 </Grid>
                 <Grid Row="2">
-                    <GroupBox Header="执行信息"></GroupBox>
+                    <GroupBox Header="执行信息">
+                        <StackPanel Orientation="Vertical">
+                            <DockPanel>
+                                <Label Content="需下载文件总数：" DockPanel.Dock="Left"></Label>
+                                <Label x:Name="LblFileNeedTobeDownload" Width="30" Content="" DockPanel.Dock="Left"></Label>
+                                <Label Content="当前下载文件序号：" DockPanel.Dock="Left"></Label>
+                                <Label x:Name="LblCurrentFileIndex" Width="30" Content="" DockPanel.Dock="Left"></Label>
+                                <Label Content="当前下载文件：" DockPanel.Dock="Left"></Label>
+                                <Label x:Name="LblCurrentDownloadFile"></Label>
+                            </DockPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="上次发送时间：" DockPanel.Dock="Left"></Label>
+                                <Label x:Name="LblLastSendTime" Width="125" DockPanel.Dock="Left"></Label>
+                                <Label Content="上次接收时间：" DockPanel.Dock="Left"></Label>
+                                <Label x:Name="LblLastReceiveTime" Width="125" DockPanel.Dock="Left"></Label>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="总发送："></Label>
+                                <Label x:Name="LblTotalSendByteCount" Width="90"></Label>
+                                <Label Content="总接收："></Label>
+                                <Label x:Name="LblTotalReceiveByteCount" Width="90"></Label>
+                                <Label Content="上次发送："></Label>
+                                <Label x:Name="LblLastSendByteCount" Width="60"></Label>
+                                <Label Content="上次接收："></Label>
+                                <Label x:Name="LblLastReceiveByteCount" Width="60"></Label>
+                            </StackPanel>
+                            <DockPanel>
+                                <Label Content="总下载进度：" Width="120"></Label>
+                                <ProgressBar x:Name="BarTotalDownloadProgress" DockPanel.Dock="Left"></ProgressBar>
+                            </DockPanel>
+                            <DockPanel Margin="0, 5, 0, 0">
+                                <Label Content="当前文件进度：" Width="120"></Label>
+                                <ProgressBar x:Name="BarCurrentDownloadProgress" DockPanel.Dock="Left"></ProgressBar>
+                            </DockPanel>
+                        </StackPanel>
+                    </GroupBox>
                 </Grid>
             </Grid>
         </Grid>

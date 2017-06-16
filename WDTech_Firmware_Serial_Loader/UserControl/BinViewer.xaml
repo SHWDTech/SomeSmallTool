@@ -9,6 +9,10 @@
             <GroupBox Header="固件信息">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
+                    <Label Content="文件路径："></Label>
+                    <Label Content="{Binding Path=FilePath, Mode=OneWay}"></Label>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
                     <Label Content="目标对象：" Width="110"></Label>
                     <TextBox Width="75" x:Name="CmbTargetObject" VerticalContentAlignment="Center" IsReadOnly="True" Background="#f0f0f0" Text="{Binding Path=TargetObject, Mode=OneWay }"></TextBox>
                     <Label Content="BIN文件大小(byte)：" Width="135"></Label>

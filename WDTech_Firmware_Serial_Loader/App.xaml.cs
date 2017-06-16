@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using FirmwareDownloaderHelper;
 using WDTech_Firmware_Serial_Loader.Data;
+using WDTech_Firmware_Serial_Loader.Models;
 
 namespace WDTech_Firmware_Serial_Loader
 {
@@ -30,6 +31,7 @@ namespace WDTech_Firmware_Serial_Loader
             {
                 var ctx = new FirmwareSerialLoaderSqliteContext();
                 BinFileOptionsHelper.UpdateConfigDicts(ctx.ConfigDicts);
+                DownloadConfigs.InitConfigs(ctx.LocalConfigs);
             }
             catch (Exception ex)
             {

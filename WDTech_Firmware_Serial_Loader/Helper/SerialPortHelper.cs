@@ -8,14 +8,21 @@ namespace WDTech_Firmware_Serial_Loader.Helper
 {
     public class SerialPortHelper
     {
-        private static SerialPort _currentSerialPort;
+        private SerialPort _currentSerialPort;
 
-        private static Exception _operateException;
+        private Exception _operateException;
 
-        private static string _operateMessage = string.Empty;
+        private string _operateMessage = string.Empty;
+
+        public bool SerialPortIsOpen => _currentSerialPort != null &&_currentSerialPort.IsOpen;
+
+        public bool CanSend => _currentSerialPort.BytesToWrite == 0;
+
+        public event SerialDataReceivedEventHandler DataReceived;
 
         public static List<StopBitSelectItem> GetSerialPortStopBits()
         {
+            
             var values = Enum.GetValues(typeof(StopBits)).Cast<StopBits>().Where(s => s!= StopBits.None);
             return values.Select(v => new StopBitSelectItem
             {
@@ -66,18 +73,23 @@ namespace WDTech_Firmware_Serial_Loader.Helper
             }).ToList();
         }
 
-        public static void OpenSerialPort(string portName, int baudRate, int dataBits, StopBits stopBits, Parity parity)
+        public bool OpenSerialPort(string portName, int baudRate, int dataBits, StopBits stopBits, Parity parity)
         {
             try
             {
-                _currentSerialPort = new SerialPort
+                if (_currentSerialPort == null)
                 {
-                    PortName = portName,
-                    BaudRate = baudRate,
-                    DataBits = dataBits,
-                    StopBits = stopBits,
-                    Parity = parity
-                };
+                    _currentSerialPort = new SerialPort();
+                    _currentSerialPort.DataReceived += (sender, e) =>
+                    {
+                        DataReceived?.Invoke(sender, e);
+                    };
+                }
+                _currentSerialPort.PortName = portName;
+                _currentSerialPort.BaudRate = baudRate;
+                _currentSerialPort.DataBits = dataBits;
+                _currentSerialPort.StopBits = stopBits;
+                _currentSerialPort.Parity = parity;
                 _currentSerialPort.Open();
                 _operateMessage = @"串口已打开。";
             }
@@ -85,10 +97,12 @@ namespace WDTech_Firmware_Serial_Loader.Helper
             {
                 _operateException = ex;
                 _operateMessage = @"打开串口失败。";
+                return false;
             }
+            return true;
         }
 
-        public static void CloseSerialPort()
+        public bool CloseSerialPort()
         {
             try
             {
@@ -99,31 +113,20 @@ namespace WDTech_Firmware_Serial_Loader.Helper
             {
                 _operateException = ex;
                 _operateMessage = @"关闭串口失败";
-            }
-        }
-
-        public static string GetOperateMessage() => _operateMessage;
-
-        public static string LastException() => _operateException?.Message ?? string.Empty;
-
-        public static bool IsSerialPortOpened()
-        {
-            return _currentSerialPort != null && _currentSerialPort.IsOpen;
-        }
-
-        public static bool SendBytes(byte[] bytes)
-        {
-            try
-            {
-                _currentSerialPort.Write(bytes, 0, bytes.Length);
-            }
-            catch (Exception ex)
-            {
-                _operateException = ex;
-                _operateMessage = @"数据发送成功。";
                 return false;
             }
             return true;
         }
+
+        public string GetOperateMessage() => _operateMessage;
+
+        public string LastException() => _operateException?.Message ?? string.Empty;
+
+        public bool IsSerialPortOpened()
+        {
+            return _currentSerialPort != null && _currentSerialPort.IsOpen;
+        }
+
+        public void SendBytes(byte[] bytes) => _currentSerialPort.Write(bytes, 0, bytes.Length);
     }
 }

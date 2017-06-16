@@ -1,9 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace FirmwareDownloaderHelper
 {
     public class Package
     {
+        protected uint PayloadLength;
+
+        protected ushort BasicLength;
+
+        public PackageStatus PackageStatus { get; protected set; } = PackageStatus.Unpackaged;
+
         internal Package()
         {            
         }
@@ -18,7 +25,7 @@ namespace FirmwareDownloaderHelper
 
         public byte[] RequestCode { get; protected set; }
 
-        public byte[] PayLoadLength { get; protected set; }
+        public byte[] PayLoadDataLength { get; protected set; }
 
         public byte[] PayloadData { get; protected set; }
 
@@ -26,23 +33,25 @@ namespace FirmwareDownloaderHelper
 
         public byte ProtocolTail { get; protected set; }
 
-        public List<byte> PackageBytes { get; protected set; } = new List<byte>();
-
-        protected virtual byte[] CombinePackage()
+        public virtual byte[] EncodeFrame()
         {
-            PackageBytes.Add(ProtocolHead);
-            PackageBytes.Add(CommandType);
-            PackageBytes.Add(CommandByte);
-            PackageBytes.Add(OperateCode);
-            PackageBytes.AddRange(RequestCode);
-            PackageBytes.AddRange(PayLoadLength);
-            PackageBytes.AddRange(PayloadData);
+            var frame = new List<byte> {ProtocolHead, CommandType, CommandByte, OperateCode};
+            frame.AddRange(RequestCode);
+            frame.AddRange(PayLoadDataLength);
+            frame.AddRange(PayloadData);
+            var checkSum = CheckSum.GetUsmbcrc16(frame, frame.Count);
+            var crcCheckBytes = BitConverter.GetBytes(checkSum);
+            Array.Reverse(crcCheckBytes);
+            CrcCheck = crcCheckBytes;
+            frame.AddRange(CrcCheck);
+            frame.Add(ProtocolTail);
 
-            CrcCheck = Converter.GetReversedUShortBytes(CheckSum.GetUsmbcrc16(PackageBytes, PackageBytes.Count));
-            PackageBytes.AddRange(CrcCheck);
-            PackageBytes.Add(ProtocolTail);
+            return frame.ToArray();
+        }
 
-            return PackageBytes.ToArray();
+        public virtual void DecodeFrame(byte[] buffer)
+        {
+
         }
     }
 }

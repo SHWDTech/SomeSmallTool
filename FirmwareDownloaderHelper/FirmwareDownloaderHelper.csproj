@@ -47,9 +47,16 @@
     <Compile Include="ConfigDict.cs" />
     <Compile Include="Converter.cs" />
     <Compile Include="CrcCheckSum.cs" />
+    <Compile Include="DownloadSender\DownloadProcessControl.cs" />
+    <Compile Include="DownloadSender\DownloadProcessControlEvents.cs" />
+    <Compile Include="DownloadSender\DownloadSenderEvents.cs" />
+    <Compile Include="Extensions\ArrayExtension.cs" />
     <Compile Include="FirmwareUpdatePackage.cs" />
+    <Compile Include="DownloadSender\IDownloadSender.cs" />
     <Compile Include="Package.cs" />
     <Compile Include="PackageHelper.cs" />
+    <Compile Include="PackageHelperEvents.cs" />
+    <Compile Include="PackageStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
