@@ -1,20 +1,19 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Timers;
 using System.Windows;
-using Microsoft.Win32;
-using WDTech_Firmware_Serial_Loader.Helper;
 using System.Windows.Controls;
 using FirmwareDownloaderHelper;
-using WDTech_Firmware_Serial_Loader.Data;
-using WDTech_Firmware_Serial_Loader.UserControl;
-using WDTech_Firmware_Serial_Loader.Views;
-using System.IO.Ports;
-using System.Timers;
 using FirmwareDownloaderHelper.DownloadSender;
-using WDTech_Firmware_Serial_Loader.Models;
+using Microsoft.Win32;
+using WDTech_Frimware_Tcp_Loader.Data;
+using WDTech_Frimware_Tcp_Loader.Models;
+using WDTech_Frimware_Tcp_Loader.UserControl;
+using WDTech_Frimware_Tcp_Loader.Views;
 
-namespace WDTech_Firmware_Serial_Loader
+namespace WDTech_Frimware_Tcp_Loader
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -23,41 +22,10 @@ namespace WDTech_Firmware_Serial_Loader
     {
         private readonly ObservableCollection<CheckedBinFile> _loadedBinFiles = new ObservableCollection<CheckedBinFile>();
 
-        private readonly SerialPortHelper _portHelper;
-
-        private readonly SerialPortDownloader _portDownloader;
-
         public MainWindow()
         {
             InitializeComponent();
             LbLoadedBinFile.ItemsSource = _loadedBinFiles;
-            LoadParams();
-            _portHelper = new SerialPortHelper();
-            _portDownloader = new SerialPortDownloader(_portHelper);
-        }
-
-        private void LoadParams()
-        {
-            CmbBoundRate.ItemsSource = SerialPortHelper.GetSerialPortBoundRate();
-            CmbDataBit.ItemsSource = SerialPortHelper.GetSerialPortDataBits();
-            CmbStopBit.ItemsSource = SerialPortHelper.GetSerialPortStopBits();
-            CmbParity.ItemsSource = SerialPortHelper.GetSerialPortParity();
-            CmbBoundRate.SelectedIndex = 9;
-            CmbDataBit.SelectedIndex = 3;
-            CmbStopBit.SelectedIndex = 0;
-            CmbParity.SelectedIndex = 0;
-            RefreshSystemSerialPortList();
-        }
-
-        private void ReFindSystemSerialPort(object sender, RoutedEventArgs e) => RefreshSystemSerialPortList();
-
-        private void RefreshSystemSerialPortList()
-        {
-            CmbComPort.ItemsSource = SerialPortHelper.GetSerialPorts();
-            if (CmbComPort.Items.Count > 0)
-            {
-                CmbComPort.SelectedIndex = 0;
-            }
         }
 
         private void AddNewBinFile(object sender, RoutedEventArgs e)
@@ -123,19 +91,19 @@ namespace WDTech_Firmware_Serial_Loader
                 return;
             }
             var binFileInfo = (BinFileInfomation)((BinViewer)binViewer).DataContext;
-            var processControl = GetDownloadProcesser(new[] {binFileInfo});
+            var processControl = GetDownloadProcesser(new[] { binFileInfo });
             StartDownloadProcess(processControl);
         }
 
         private void SendSelectedBinFile(object sender, RoutedEventArgs e)
         {
             var selectedFileNames = (from object item in LbLoadedBinFile.Items
-                                     where item is CheckedBinFile
-                                     select item as CheckedBinFile)
+                    where item is CheckedBinFile
+                    select item as CheckedBinFile)
                 .Where(f => f.IsChecked).Select(fi => fi.BinFileName).ToList();
             var fileInfos = (from object item in SelectedBinFileTabControl.Items
-                             where item is TabItem
-                             select (BinFileInfomation)((TabItem)item).DataContext)
+                    where item is TabItem
+                    select (BinFileInfomation)((TabItem)item).DataContext)
                 .Where(v => selectedFileNames.Contains(v.FilePath)).ToArray();
             var processControl = GetDownloadProcesser(fileInfos);
             StartDownloadProcess(processControl);
@@ -166,7 +134,7 @@ namespace WDTech_Firmware_Serial_Loader
                 });
             };
             updateTimer.Start();
-            BtnSwitchSerialPortStatus.IsEnabled = false;
+            BtnStartServer.IsEnabled = false;
             control.ProcessFinished += (e) =>
             {
                 updateTimer.Stop();
@@ -176,7 +144,7 @@ namespace WDTech_Firmware_Serial_Loader
                     BarTotalDownloadProgress.Value = 100;
                     LblMessage.Content = @"下载完成。";
                     MessageBox.Show(e.Message, "系统信息", MessageBoxButton.OK, MessageBoxImage.Information);
-                    BtnSwitchSerialPortStatus.IsEnabled = true;
+                    BtnStartServer.IsEnabled = true;
                 });
             };
             control.ProcessInterrupted += (e) =>
@@ -187,7 +155,7 @@ namespace WDTech_Firmware_Serial_Loader
                 {
                     LblMessage.Content = @"下载已中断。";
                     MessageBox.Show(e.Message, "系统信息", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    BtnSwitchSerialPortStatus.IsEnabled = true;
+                    BtnStartServer.IsEnabled = true;
                 });
             };
 
@@ -195,7 +163,7 @@ namespace WDTech_Firmware_Serial_Loader
             LblMessage.Content = @"开始文件下载。";
         }
 
-        private DownloadProcessControl GetDownloadProcesser(BinFileInfomation[] infos)
+        private static DownloadProcessControl GetDownloadProcesser(BinFileInfomation[] infos)
         {
             var binInfos = infos.Select(i => new BinInfo
             {
@@ -206,57 +174,12 @@ namespace WDTech_Firmware_Serial_Loader
                 TimeOut = DownloadConfigs.TimeOut
             }).ToArray();
 
-            return new DownloadProcessControl(binInfos, _portDownloader);
+            return new DownloadProcessControl(binInfos, new List<IDownloadSender>());
         }
 
         private void OpenDownloadSetting(object sender, RoutedEventArgs e) => new DownloadSetting
         {
             Owner = this
         }.ShowDialog();
-
-        private void SwitchSerialPortStatus(object sender, RoutedEventArgs e)
-        {
-            if (!_portHelper.SerialPortIsOpen)
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    LockSerialPortParamControls(false);
-                    _portHelper.OpenSerialPort(CmbComPort.Text
-                        , (int)CmbBoundRate.SelectedValue
-                        , (int)CmbDataBit.SelectedValue
-                        , (StopBits)CmbStopBit.SelectedValue
-                        , (Parity)CmbParity.SelectedValue);
-                    if (_portHelper.SerialPortIsOpen)
-                    {
-                        BtnSwitchSerialPortStatus.Content = @"关闭串口";
-                        LblMessage.Content = @"串口已经打开";
-                    }
-                    else
-                    {
-                        LockSerialPortParamControls(true);
-                        LblMessage.Content = @"串口打开失败，请检查是否被占用";
-                    }
-                });
-            }
-            else
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    _portHelper.CloseSerialPort();
-                    if (!_portHelper.SerialPortIsOpen)
-                    {
-                        BtnSwitchSerialPortStatus.Content = @"打开串口";
-                        LockSerialPortParamControls(true);
-                        LblMessage.Content = @"串口已经关闭";
-                    }
-                });
-            }
-        }
-
-        private void LockSerialPortParamControls(bool status)
-        {
-            CmbComPort.IsEnabled = CmbBoundRate.IsEnabled =
-                CmbDataBit.IsEnabled = CmbStopBit.IsEnabled = CmbParity.IsEnabled = status;
-        }
     }
 }

@@ -1,25 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO.Ports;
-using System.Text;
-using FirmwareDownloaderHelper.DownloadSender;
 using FirmwareDownloaderHelper;
+using FirmwareDownloaderHelper.DownloadSender;
 
-namespace WDTech_Firmware_Serial_Loader.Helper
+namespace WDTech_Frimware_Tcp_Loader.Helper
 {
-    public class SerialPortDownloader : IDownloadSender
+    public class TcpDownloader : IDownloadSender
     {
+        private readonly SocketClient _client;
+
         private readonly List<byte> _buffer = new List<byte>();
 
-        private readonly SerialPortHelper _portHelper;
-
-        public SerialPortDownloader(SerialPortHelper portHelper)
+        public TcpDownloader(SocketClient client)
         {
-            _portHelper = portHelper;
-            _portHelper.DataReceived += (sender, e) =>
+            _client = client;
+            _client.TcpDataReceived += (e) =>
             {
-                var readBytes = Encoding.UTF8.GetBytes(((SerialPort)sender).ReadExisting());
-                _buffer.AddRange(readBytes);
+                var readBytes = new byte[e.BytesTransferred];
+                for (var i = 0; i < e.BytesTransferred; i++)
+                {
+                    readBytes[i] = e.Buffer[i];
+                    _buffer.AddRange(readBytes);
+                }
                 var package = DecodePackage();
                 Received?.Invoke(new DownloadSenderReceivedArgs
                 {
@@ -33,7 +35,7 @@ namespace WDTech_Firmware_Serial_Loader.Helper
         {
             try
             {
-                _portHelper.SendBytes(content);
+                _client.Send(content);
                 SendSuccessed?.Invoke(new DownloadSenderSendEventArgs
                 {
                     SendContent = content

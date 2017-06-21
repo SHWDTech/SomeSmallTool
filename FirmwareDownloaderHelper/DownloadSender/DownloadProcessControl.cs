@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace FirmwareDownloaderHelper.DownloadSender
 {
@@ -46,6 +47,22 @@ namespace FirmwareDownloaderHelper.DownloadSender
             }
         }
 
+        public DownloadProcessControl(BinInfo[] binfileInfos, List<IDownloadSender> downloadSenders)
+        {
+            TotalFileDownloadMissions = binfileInfos.Length;
+            _packageHelpers = new PackageHelper[binfileInfos.Length * downloadSenders.Count];
+            var index = 0;
+            foreach (var currentDownloadSender in downloadSenders)
+            {
+                foreach (BinInfo info in binfileInfos)
+                {
+                    _packageHelpers[index] = new PackageHelper(info, currentDownloadSender);
+                    index++;
+                }
+            }
+
+        }
+
         public void StartProcess()
         {
             if (CurrentMission >= TotalFileDownloadMissions)
@@ -56,22 +73,26 @@ namespace FirmwareDownloaderHelper.DownloadSender
                 });
                 return;
             }
+            var lastHelper = _onProcessHelper;
             _onProcessHelper = _packageHelpers[CurrentMission];
-            _onProcessHelper.DownloadInterrupted += (e) =>
+            if (lastHelper.DownloadSender != _onProcessHelper.DownloadSender)
             {
-                _onProcessHelper = null;
-                ProcessInterrupted?.Invoke(new DownloadProcessControlEventArgs
+                _onProcessHelper.DownloadInterrupted += (e) =>
                 {
-                    Message = e.Message,
-                    Exception = e.Exception
-                });
-            };
-            _onProcessHelper.DownloadFinished += (e) =>
-            {
-                StartProcess();
-                _processedMissions++;
-            };
-            _onProcessHelper.StartDownload();
+                    _onProcessHelper = null;
+                    ProcessInterrupted?.Invoke(new DownloadProcessControlEventArgs
+                    {
+                        Message = e.Message,
+                        Exception = e.Exception
+                    });
+                };
+                _onProcessHelper.DownloadFinished += (e) =>
+                {
+                    StartProcess();
+                    _processedMissions++;
+                };
+                _onProcessHelper.StartDownload();
+            }
             CurrentMission++;
         }
     }

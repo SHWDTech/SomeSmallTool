@@ -1,0 +1,167 @@
+﻿<Window x:Class="WDTech_Frimware_Tcp_Loader.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        FontSize="14"
+        ResizeMode="CanMinimize"
+        MaxHeight="768"
+        Background="#C3D7F5"
+        MaxWidth="1024"
+        Title="卫东固件升级TCP下载器" Height="768" Width="1024">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="22"></RowDefinition>
+            <RowDefinition Height="55"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="35"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Row="0">
+            <Menu FontSize="14">
+                <MenuItem Header="设置">
+                    <MenuItem Header="更新配置信息"></MenuItem>
+                    <MenuItem Header="下载功能设置" Click="OpenDownloadSetting"></MenuItem>
+                </MenuItem>
+            </Menu>
+        </Grid>
+        <Grid Row="1">
+            <Label Content="这里是LOGO"></Label>
+        </Grid>
+        <Grid Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid Column="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="320"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid Row="0">
+                        <GroupBox Header="TCP服务器参数">
+                            <StackPanel Orientation="Vertical">
+                                <DockPanel>
+                                    <Label Content="服务器IP：" Width="100"></Label>
+                                    <TextBox x:Name="TxtLocalServerIpAddress" VerticalContentAlignment="Center"></TextBox>
+                                </DockPanel>
+                                <DockPanel Margin="0, 10, 0, 0">
+                                    <Label Content="端口号：" Width="100"></Label>
+                                    <TextBox x:Name="TxtLocalServerPort" VerticalContentAlignment="Center"></TextBox>
+                                </DockPanel>
+                                <DockPanel Margin="0, 10, 0, 0">
+                                    <Label Content="已接入设备：" Width="100"></Label>
+                                    <Button x:Name="BtnSelectAllClients" Content="全选"></Button>
+                                </DockPanel>
+                                <DockPanel Margin="0, 10, 0, 0">
+                                    <ListBox x:Name="LbConnectedClients" Height="125"></ListBox>
+                                </DockPanel>
+                                <DockPanel Margin="0, 10, 0, 0">
+                                    <Button x:Name="BtnStartServer" Content="开始监听" Height="40"></Button>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                    </Grid>
+                    <Grid Row="1">
+                        <GroupBox Header="下载选项">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="30"></RowDefinition>
+                                    <RowDefinition Height="210"></RowDefinition>
+                                    <RowDefinition Height="*"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <Grid Row="0">
+                                    <Label Content="已加载BIN文件列表："></Label>
+                                </Grid>
+                                <Grid Row="1">
+                                    <ListBox x:Name="LbLoadedBinFile" Height="200">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <CheckBox Content="{Binding BinFileName}" IsChecked="{Binding IsChecked}"></CheckBox>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Grid>
+                                <Grid Row="2">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="下载当前BIN文件" Width="125" Click="SendCurrentBinFile"></Button>
+                                        <Button Content="下载选中的BIN文件" Width="125" Margin="35, 0, 0, 0" Click="SendSelectedBinFile"></Button>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </GroupBox>
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="55"></RowDefinition>
+                    <RowDefinition Height="385"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid Row="0">
+                    <GroupBox Header="BIN文件选择">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox IsReadOnly="True" Width="480" Background="#f0f0f0" x:Name="TxtSelectBinFileName"></TextBox>
+                            <Button Content="添加BIN文件" Width="90" Margin="10,0,0,0" Click="AddNewBinFile"></Button>
+                            <Button Content="重置选择" Width="90" Margin="10,0,0,0" Click="ClearSelectedFiles"></Button>
+                        </StackPanel>
+                    </GroupBox>
+                </Grid>
+                <Grid Row="1">
+                    <GroupBox Header="已选择BIN文件">
+                        <StackPanel Orientation="Vertical">
+                            <TabControl x:Name="SelectedBinFileTabControl" Background="#C3D7F5">
+                            </TabControl>
+                        </StackPanel>
+                    </GroupBox>
+                </Grid>
+                <Grid Row="2">
+                    <GroupBox Header="执行信息">
+                        <StackPanel Orientation="Vertical">
+                            <DockPanel>
+                                <Label Content="需下载文件总数：" DockPanel.Dock="Left"></Label>
+                                <Label x:Name="LblFileNeedTobeDownload" Width="30" Content="" DockPanel.Dock="Left"></Label>
+                                <Label Content="当前下载文件序号：" DockPanel.Dock="Left"></Label>
+                                <Label x:Name="LblCurrentFileIndex" Width="30" Content="" DockPanel.Dock="Left"></Label>
+                                <Label Content="当前下载文件：" DockPanel.Dock="Left"></Label>
+                                <Label x:Name="LblCurrentDownloadFile"></Label>
+                            </DockPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="上次发送时间：" DockPanel.Dock="Left"></Label>
+                                <Label x:Name="LblLastSendTime" Width="125" DockPanel.Dock="Left"></Label>
+                                <Label Content="上次接收时间：" DockPanel.Dock="Left"></Label>
+                                <Label x:Name="LblLastReceiveTime" Width="125" DockPanel.Dock="Left"></Label>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="总发送："></Label>
+                                <Label x:Name="LblTotalSendByteCount" Width="90"></Label>
+                                <Label Content="总接收："></Label>
+                                <Label x:Name="LblTotalReceiveByteCount" Width="90"></Label>
+                                <Label Content="上次发送："></Label>
+                                <Label x:Name="LblLastSendByteCount" Width="60"></Label>
+                                <Label Content="上次接收："></Label>
+                                <Label x:Name="LblLastReceiveByteCount" Width="60"></Label>
+                            </StackPanel>
+                            <DockPanel>
+                                <Label Content="总下载进度：" Width="120"></Label>
+                                <ProgressBar x:Name="BarTotalDownloadProgress" DockPanel.Dock="Left"></ProgressBar>
+                            </DockPanel>
+                            <DockPanel Margin="0, 5, 0, 0">
+                                <Label Content="当前文件进度：" Width="120"></Label>
+                                <ProgressBar x:Name="BarCurrentDownloadProgress" DockPanel.Dock="Left"></ProgressBar>
+                            </DockPanel>
+                        </StackPanel>
+                    </GroupBox>
+                </Grid>
+            </Grid>
+        </Grid>
+        <Grid Row="3">
+            <StatusBar>
+                <Label x:Name="LblMessage"></Label>
+            </StatusBar>
+        </Grid>
+    </Grid>
+</Window>

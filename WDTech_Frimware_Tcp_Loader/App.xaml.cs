@@ -3,10 +3,10 @@ using System.Configuration;
 using System.IO;
 using System.Windows;
 using FirmwareDownloaderHelper;
-using WDTech_Firmware_Serial_Loader.Data;
-using WDTech_Firmware_Serial_Loader.Models;
+using WDTech_Frimware_Tcp_Loader.Data;
+using WDTech_Frimware_Tcp_Loader.Models;
 
-namespace WDTech_Firmware_Serial_Loader
+namespace WDTech_Frimware_Tcp_Loader
 {
     /// <summary>
     /// Interaction logic for App.xaml

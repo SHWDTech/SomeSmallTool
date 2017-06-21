@@ -1,0 +1,67 @@
+﻿<UserControl x:Class="WDTech_Frimware_Tcp_Loader.UserControl.BinViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="650">
+    <Grid>
+            <GroupBox Header="固件信息">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="文件路径："></Label>
+                    <Label Content="{Binding Path=FilePath, Mode=OneWay}"></Label>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="目标对象：" Width="110"></Label>
+                    <TextBox Width="75" x:Name="CmbTargetObject" VerticalContentAlignment="Center" IsReadOnly="True" Background="#f0f0f0" Text="{Binding Path=TargetObject, Mode=OneWay }"></TextBox>
+                    <Label Content="BIN文件大小(byte)：" Width="135"></Label>
+                    <TextBox IsReadOnly="True" x:Name="TxtYuriBinSize" Background="#f0f0f0" Width="105" VerticalContentAlignment="Center" Text="{Binding Path=BinFileSize, Mode=OneWay }"></TextBox>
+                    <Label Content="更新模式：" Width="100"></Label>
+                    <TextBox Width="125" x:Name="CmbUpdateMode" VerticalContentAlignment="Center" IsReadOnly="True" Background="#f0f0f0" Text="{Binding Path=UpdateMode, Mode=OneWay }"></TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0, 10, 0, 0">
+                    <Label Content="固件发布时间：" Width="110"></Label>
+                    <TextBox x:Name="TxtReleashYear" Width="60" IsReadOnly="True" Background="#f0f0f0" VerticalContentAlignment="Center" Text="{Binding Path=FirmwareReleaseYear, Mode=OneWay }"></TextBox>
+                    <Label Content="年"></Label>
+                    <TextBox x:Name="TxtReleashMonth" Width="45" IsReadOnly="True" Background="#f0f0f0" VerticalContentAlignment="Center" Text="{Binding Path=FirmwareReleaseMonth, Mode=OneWay }"></TextBox>
+                    <Label Content="月"></Label>
+                    <TextBox x:Name="TxtReleashDay" Width="45" IsReadOnly="True" Background="#f0f0f0" VerticalContentAlignment="Center" Text="{Binding Path=FirmwareReleaseDay, Mode=OneWay }"></TextBox>
+                    <Label Content="日"></Label>
+                    <TextBox x:Name="TxtReleashHour" Width="45" IsReadOnly="True" Background="#f0f0f0" VerticalContentAlignment="Center" Text="{Binding Path=FirmwareReleaseHour, Mode=OneWay }"></TextBox>
+                    <Label Content="时"></Label>
+                    <TextBox x:Name="TxtReleashMinute" Width="45" IsReadOnly="True" Background="#f0f0f0" VerticalContentAlignment="Center" Text="{Binding Path=FirmwareReleaseMinute, Mode=OneWay }"></TextBox>
+                    <Label Content="分"></Label>
+                    <TextBox x:Name="TxtReleashSecond" Width="45" IsReadOnly="True" Background="#f0f0f0" VerticalContentAlignment="Center" Text="{Binding Path=FirmwareReleaseSecond, Mode=OneWay }"></TextBox>
+                    <Label Content="秒"></Label>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0, 10, 0, 0">
+                    <Label Content="固件版本号：" Width="110"></Label>
+                    <TextBox x:Name="TxtVersionCodeFirst" Width="125" IsReadOnly="True" Background="#f0f0f0" VerticalContentAlignment="Center" Text="{Binding Path=FirmwareVersionFirst, Mode=OneWay }"></TextBox>
+                    <Label Content="."></Label>
+                    <TextBox x:Name="TxtVersionCodeSecond" Width="125" IsReadOnly="True" Background="#f0f0f0" VerticalContentAlignment="Center" Text="{Binding Path=FirmwareVersionSecond, Mode=OneWay }"></TextBox>
+                    <Label Content="."></Label>
+                    <TextBox x:Name="TxtVersionCodeThird" Width="125" IsReadOnly="True" Background="#f0f0f0" VerticalContentAlignment="Center" Text="{Binding Path=FirmwareVersionThird, Mode=OneWay }"></TextBox>
+                    <Label Content="."></Label>
+                    <TextBox x:Name="TxtVersionCodeFourth" Width="125" IsReadOnly="True" Background="#f0f0f0" VerticalContentAlignment="Center" Text="{Binding Path=FirmwareVersionFourth, Mode=OneWay }"></TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Margin="0, 10, 0, 0">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="版本描述（总长度233个Yuri）"></Label>
+                        <TextBox x:Name="TxtDescribeUsed" IsReadOnly="True" Width="45" Background="#f0f0f0" VerticalContentAlignment="Center" Text="{Binding Path=DescriptionLength, Mode=OneWay }"></TextBox>
+                        <Label Content="已使用"></Label>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Margin="0, 10, 0, 0">
+                        <TextBox x:Name="TxtDescribe" IsReadOnly="True" Background="#f0f0f0" Height="75" TextWrapping="WrapWithOverflow" Width="625" Text="{Binding Path=Description, Mode=OneWay }"></TextBox>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0, 10, 0, 0">
+                    <Label Content="BIN文件校验值：" Width="125"></Label>
+                    <TextBox x:Name="TxtBinCheck"  IsReadOnly="True" Width="125" Background="#f0f0f0" VerticalContentAlignment="Center" Text="{Binding Path=BinFileCheckSum, Mode=OneWay }"></TextBox>
+                    <Label Content="描述信息校验值：" Width="125"></Label>
+                    <TextBox x:Name="TxtDescCheck" IsReadOnly="True" Width="125" Background="#f0f0f0" VerticalContentAlignment="Center" Text="{Binding Path=DescribeCheckSum, Mode=OneWay }"></TextBox>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+    </Grid>
+</UserControl>

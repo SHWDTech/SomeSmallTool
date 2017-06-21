@@ -9,7 +9,7 @@ namespace FirmwareDownloaderHelper
     {
         private readonly FirmwareUpdatePackage _package;
 
-        private readonly IDownloadSender _downloadSender;
+        public IDownloadSender DownloadSender { get; }
 
         private readonly BinInfo _binInfo;
 
@@ -40,7 +40,7 @@ namespace FirmwareDownloaderHelper
         public PackageHelper(BinInfo info, IDownloadSender downloadSender)
         {
             _binInfo = info;
-            _downloadSender = downloadSender;
+            DownloadSender = downloadSender;
             var rest = info.BinFileLength % info.PackageBinLength;
             var fullPackageCount = info.BinFileLength / info.PackageBinLength;
             var totalPackageCount = rest == 0 ? (ushort)fullPackageCount : (ushort)(fullPackageCount + 1);
@@ -53,7 +53,7 @@ namespace FirmwareDownloaderHelper
             _timerOutTimer.Elapsed += (sender, args) =>
             {
                 _isDownloading = false;
-                _downloadSender.Received -= Received;
+                DownloadSender.Received -= Received;
                 DownloadInterrupt(new DownloadInterruptedEventArgs
                 {
                     Message = "等待回复超时，下载中断。"
@@ -78,9 +78,9 @@ namespace FirmwareDownloaderHelper
 
         public void StartDownload()
         {
-            _downloadSender.SendSuccessed += SendSuccessed;
-            _downloadSender.SendFailed += SendFailed;
-            _downloadSender.Received += Received;
+            DownloadSender.SendSuccessed += SendSuccessed;
+            DownloadSender.SendFailed += SendFailed;
+            DownloadSender.Received += Received;
             _isDownloading = true;
 
             SendAndResetTimeOut();
@@ -98,7 +98,7 @@ namespace FirmwareDownloaderHelper
                 return;
             }
             ResetTimeOut();
-            _downloadSender.Send(sendBytes);
+            DownloadSender.Send(sendBytes);
         }
 
         private void SendSuccessed(DownloadSenderSendEventArgs e)
@@ -162,9 +162,9 @@ namespace FirmwareDownloaderHelper
         {
             _isDownloading = false;
             _timerOutTimer.Stop();
-            _downloadSender.SendSuccessed -= SendSuccessed;
-            _downloadSender.SendFailed -= SendFailed;
-            _downloadSender.Received -= Received;
+            DownloadSender.SendSuccessed -= SendSuccessed;
+            DownloadSender.SendFailed -= SendFailed;
+            DownloadSender.Received -= Received;
         }
     }
 }
