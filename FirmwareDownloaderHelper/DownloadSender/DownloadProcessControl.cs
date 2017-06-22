@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FirmwareDownloaderHelper.DownloadSender
 {
@@ -7,93 +8,96 @@ namespace FirmwareDownloaderHelper.DownloadSender
     {
         public int TotalFileDownloadMissions { get; }
 
-        public int CurrentMission { get; private set; }
+        public int CurrentFileIndex => _downloadUnints.Select(d => d.CurrentHelperIndex).Sum();
 
-        private int _processedMissions;
+        private readonly DownloadUnit[] _downloadUnints;
 
-        private readonly PackageHelper[] _packageHelpers;
+        private DownloadUnit _onProcessUnit;
 
-        private PackageHelper _onProcessHelper;
+        private int _currentUnitIndex;
 
         public event ProcessInterrupted ProcessInterrupted;
 
         public event ProcessFinished ProcessFinished;
 
-        public string CurrentProcessFile => _onProcessHelper == null ? "N/A" : _onProcessHelper.BinFileFullPathWithName;
+        public event ProcessSkiped ProcessSkiped;
 
-        public DateTime? LastSendDateTime => _onProcessHelper?.LastSendDateTime;
+        public string CurrentProcessFile => _onProcessUnit == null ? "N/A" : _onProcessUnit.BinFileFullPathWithName;
 
-        public DateTime? LastReceiveDateTime => _onProcessHelper?.LastReceiveDateTime;
+        public DateTime? LastSendDateTime => _onProcessUnit?.LastSendDateTime;
 
-        public int? TotalSendByteCount => _onProcessHelper?.TotalSendByteCount;
+        public DateTime? LastReceiveDateTime => _onProcessUnit?.LastReceiveDateTime;
 
-        public int? TotalReceiveByteCount => _onProcessHelper?.TotalReceiveByteCount;
+        public int? TotalSendByteCount => _downloadUnints.Select(d => d.TotalSendByteCount).Sum();
 
-        public int? LastSendByteCount => _onProcessHelper?.LastSendByteCount;
+        public int? TotalReceiveByteCount => _downloadUnints.Select(d => d.TotalReceiveByteCount).Sum();
 
-        public int? LastReceiveByteCount => _onProcessHelper?.LastReceiveByteCount;
+        public int? LastSendByteCount => _onProcessUnit?.LastSendByteCount;
 
-        public double? DownloadProgress => _onProcessHelper?.DownloadProgress;
+        public int? LastReceiveByteCount => _onProcessUnit?.LastReceiveByteCount;
 
-        public double? TotalProgress => (double)_processedMissions / TotalFileDownloadMissions * 100;
+        public double? DownloadProgress => _onProcessUnit?.DownloadProgress;
+
+        public double? TotalProgress => (double)_downloadUnints.Select(d => d.ProcessedFiles).Sum() / TotalFileDownloadMissions * 100;
 
         public DownloadProcessControl(BinInfo[] binfileInfos, IDownloadSender downloadSender)
         {
             TotalFileDownloadMissions = binfileInfos.Length;
-            _packageHelpers = new PackageHelper[binfileInfos.Length];
-            for (var i = 0; i < binfileInfos.Length; i++)
-            {
-                _packageHelpers[i] = new PackageHelper(binfileInfos[i], downloadSender);
-            }
+            _downloadUnints = new DownloadUnit[1];
+            _downloadUnints[0] = new DownloadUnit(binfileInfos, downloadSender);
+
         }
 
         public DownloadProcessControl(BinInfo[] binfileInfos, List<IDownloadSender> downloadSenders)
         {
-            TotalFileDownloadMissions = binfileInfos.Length;
-            _packageHelpers = new PackageHelper[binfileInfos.Length * downloadSenders.Count];
+            TotalFileDownloadMissions = binfileInfos.Length * downloadSenders.Count;
+            _downloadUnints = new DownloadUnit[binfileInfos.Length * downloadSenders.Count];
             var index = 0;
             foreach (var currentDownloadSender in downloadSenders)
             {
-                foreach (BinInfo info in binfileInfos)
-                {
-                    _packageHelpers[index] = new PackageHelper(info, currentDownloadSender);
-                    index++;
-                }
+                _downloadUnints[index] = new DownloadUnit(binfileInfos, currentDownloadSender);
+                index++;
             }
 
         }
 
         public void StartProcess()
         {
-            if (CurrentMission >= TotalFileDownloadMissions)
+            if (_currentUnitIndex >= _downloadUnints.Length)
             {
                 ProcessFinished?.Invoke(new DownloadProcessControlEventArgs
                 {
-                    Message = $"BIN文件全部下载结束，共{TotalFileDownloadMissions}个文件，成功下载{CurrentMission}个文件。"
+                    Message = $"BIN文件全部下载结束，共{TotalFileDownloadMissions}个文件，成功下载{CurrentFileIndex}个文件。"
                 });
                 return;
             }
-            var lastHelper = _onProcessHelper;
-            _onProcessHelper = _packageHelpers[CurrentMission];
-            if (lastHelper.DownloadSender != _onProcessHelper.DownloadSender)
+            _onProcessUnit = _downloadUnints[CurrentFileIndex];
+            _onProcessUnit.DownloadInterrupted += (e) =>
             {
-                _onProcessHelper.DownloadInterrupted += (e) =>
+                if (_currentUnitIndex >= _downloadUnints.Length)
                 {
-                    _onProcessHelper = null;
                     ProcessInterrupted?.Invoke(new DownloadProcessControlEventArgs
                     {
                         Message = e.Message,
                         Exception = e.Exception
                     });
-                };
-                _onProcessHelper.DownloadFinished += (e) =>
+                }
+                else
                 {
+                    ProcessSkiped?.Invoke(new DownloadProcessControlEventArgs
+                    {
+                        Message = "文件下载出错，下载已跳过，继续处理后续设备下载。",
+                        Exception = e.Exception
+                    });
                     StartProcess();
-                    _processedMissions++;
-                };
-                _onProcessHelper.StartDownload();
-            }
-            CurrentMission++;
+                }
+            };
+            _onProcessUnit.DownloadFinished += (e) =>
+            {
+                StartProcess();
+            };
+            _onProcessUnit.StartDownload();
+            _currentUnitIndex++;
         }
     }
 }

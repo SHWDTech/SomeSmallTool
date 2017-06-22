@@ -6,6 +6,8 @@ namespace FirmwareDownloaderHelper.DownloadSender
 
     public delegate void ProcessFinished(DownloadProcessControlEventArgs e);
 
+    public delegate void ProcessSkiped(DownloadProcessControlEventArgs e);
+
     public class DownloadProcessControlEventArgs : EventArgs
     {
         public string Message { get; set; }

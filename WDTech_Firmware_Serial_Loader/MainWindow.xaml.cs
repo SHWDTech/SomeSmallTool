@@ -116,10 +116,15 @@ namespace WDTech_Firmware_Serial_Loader
 
         private void SendCurrentBinFile(object sender, RoutedEventArgs e)
         {
+            if (!_portHelper.SerialPortIsOpen)
+            {
+                LblMessage.Content = @"串口还没有打开！";
+                return;
+            }
             var binViewer = SelectedBinFileTabControl.SelectedContent;
             if (binViewer == null)
             {
-                LblMessage.Content = @"当前没有选中BIN文件";
+                LblMessage.Content = @"当前没有选中的BIN文件。";
                 return;
             }
             var binFileInfo = (BinFileInfomation)((BinViewer)binViewer).DataContext;
@@ -129,6 +134,11 @@ namespace WDTech_Firmware_Serial_Loader
 
         private void SendSelectedBinFile(object sender, RoutedEventArgs e)
         {
+            if (!_portHelper.SerialPortIsOpen)
+            {
+                LblMessage.Content = @"串口还没有打开！";
+                return;
+            }
             var selectedFileNames = (from object item in LbLoadedBinFile.Items
                                      where item is CheckedBinFile
                                      select item as CheckedBinFile)
@@ -137,6 +147,11 @@ namespace WDTech_Firmware_Serial_Loader
                              where item is TabItem
                              select (BinFileInfomation)((TabItem)item).DataContext)
                 .Where(v => selectedFileNames.Contains(v.FilePath)).ToArray();
+            if (fileInfos.Length <= 0)
+            {
+                LblMessage.Content = @"当前没有选中的BIN文件。";
+                return;
+            }
             var processControl = GetDownloadProcesser(fileInfos);
             StartDownloadProcess(processControl);
         }
@@ -154,7 +169,7 @@ namespace WDTech_Firmware_Serial_Loader
                 {
                     LblCurrentDownloadFile.Content = control.CurrentProcessFile;
                     LblFileNeedTobeDownload.Content = control.TotalFileDownloadMissions;
-                    LblCurrentFileIndex.Content = control.CurrentMission;
+                    LblCurrentFileIndex.Content = control.CurrentFileIndex;
                     LblLastSendTime.Content = control.LastSendDateTime == null ? "N/A" : $"{control.LastSendDateTime: HH:mm:ss fff}";
                     LblLastReceiveTime.Content = control.LastReceiveDateTime == null ? "N/A" : $"{control.LastReceiveDateTime: HH:mm:ss fff}";
                     LblTotalSendByteCount.Content = control.TotalSendByteCount == null ? "N/A" : $"{control.TotalSendByteCount}";

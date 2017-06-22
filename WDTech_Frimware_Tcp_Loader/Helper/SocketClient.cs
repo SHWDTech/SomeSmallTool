@@ -5,6 +5,8 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
 {
     public delegate void TcpDataReceived(SocketClientReceiveEventArgs args);
 
+    public delegate void Disconnected(SocketClientDisconnectedArgs args);
+
     public class SocketClientEventArgs
     {
         public string Message { get; set; }
@@ -19,6 +21,11 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
         public byte[] Buffer { get; set; }
     }
 
+    public class SocketClientDisconnectedArgs : SocketClientEventArgs
+    {
+        
+    }
+
 
     public class SocketClient
     {
@@ -27,6 +34,10 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
         private readonly SocketAsyncEventArgs _asyncEventArgs;
 
         public event TcpDataReceived TcpDataReceived;
+
+        public event Disconnected Disconnected;
+
+        private bool _isDisposed;
 
         public SocketClient(Socket client)
         {
@@ -38,30 +49,49 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
                 ProcessReceive();
             };
             var willRaiseEvent = _clientSocket.ReceiveAsync(_asyncEventArgs); //投递接收请求
-            if (!willRaiseEvent)
+            if (willRaiseEvent) return;
+            lock (_clientSocket)
             {
-                lock (_clientSocket)
-                {
-                    ProcessReceive();
-                }
+                ProcessReceive();
             }
         }
 
         public void Send(byte[] sendBytes)
         {
-            _clientSocket.Send(sendBytes);
+            try
+            {
+                _clientSocket.Send(sendBytes);
+            }
+            catch (Exception)
+            {
+                ClientDisconnected(new SocketClientDisconnectedArgs());
+            }
         }
 
         private void ProcessReceive()
         {
-            if (_asyncEventArgs.BytesTransferred >= 0 && _asyncEventArgs.SocketError == SocketError.Success)
+            if (_isDisposed) return;
+            try
             {
-                DataReceived(new SocketClientReceiveEventArgs
+                if (_asyncEventArgs.BytesTransferred == 0)
                 {
-                    BytesTransferred = _asyncEventArgs.BytesTransferred,
-                    Buffer = _asyncEventArgs.Buffer
-                });
+                    ClientDisconnected(new SocketClientDisconnectedArgs());
+                    return;
+                }
+                if (_asyncEventArgs.BytesTransferred > 0 && _asyncEventArgs.SocketError == SocketError.Success)
+                {
+                    DataReceived(new SocketClientReceiveEventArgs
+                    {
+                        BytesTransferred = _asyncEventArgs.BytesTransferred,
+                        Buffer = _asyncEventArgs.Buffer
+                    });
+                }
             }
+            catch (Exception)
+            {
+                ClientDisconnected(new SocketClientDisconnectedArgs());
+            }
+            
         }
 
         private void DataReceived(SocketClientReceiveEventArgs args)
@@ -69,8 +99,16 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
             TcpDataReceived?.Invoke(args);
         }
 
+        private void ClientDisconnected(SocketClientDisconnectedArgs args)
+        {
+            Dispoose();
+            Disconnected?.Invoke(args);
+        }
+
         public void Dispoose()
         {
+            if (_isDisposed) return;
+            _isDisposed = true;
             _clientSocket.Dispose();
         }
     }

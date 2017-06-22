@@ -50,6 +50,7 @@
     <Compile Include="DownloadSender\DownloadProcessControl.cs" />
     <Compile Include="DownloadSender\DownloadProcessControlEvents.cs" />
     <Compile Include="DownloadSender\DownloadSenderEvents.cs" />
+    <Compile Include="DownloadUnit.cs" />
     <Compile Include="Extensions\ArrayExtension.cs" />
     <Compile Include="FirmwareUpdatePackage.cs" />
     <Compile Include="DownloadSender\IDownloadSender.cs" />

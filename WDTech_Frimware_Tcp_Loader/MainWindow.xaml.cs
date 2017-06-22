@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,6 +12,7 @@ using FirmwareDownloaderHelper;
 using FirmwareDownloaderHelper.DownloadSender;
 using Microsoft.Win32;
 using WDTech_Frimware_Tcp_Loader.Data;
+using WDTech_Frimware_Tcp_Loader.Helper;
 using WDTech_Frimware_Tcp_Loader.Models;
 using WDTech_Frimware_Tcp_Loader.UserControl;
 using WDTech_Frimware_Tcp_Loader.Views;
@@ -22,10 +26,91 @@ namespace WDTech_Frimware_Tcp_Loader
     {
         private readonly ObservableCollection<CheckedBinFile> _loadedBinFiles = new ObservableCollection<CheckedBinFile>();
 
+        private readonly ObservableCollection<ConnectedClient> _connectedClients = new ObservableCollection<ConnectedClient>();
+
+        private readonly SocketServer _socketServer;
+
+        private bool _isServerStarted;
+
         public MainWindow()
         {
             InitializeComponent();
             LbLoadedBinFile.ItemsSource = _loadedBinFiles;
+            LbConnectedClients.ItemsSource = _connectedClients;
+            TxtLocalServerIpAddress.Text = GetLocalIpAddress();
+            TxtLocalServerPort.Text = new Random().Next(0, 65535).ToString();
+            _socketServer = new SocketServer();
+            _socketServer.SocketAcceptd += (e) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    var remoteIpEndPoint = e.AcceptSocket.RemoteEndPoint.ToString();
+                    if (_connectedClients.Any(c => c.RemoteIpEndPoint == remoteIpEndPoint)) return;
+                    _connectedClients.Add(new ConnectedClient
+                    {
+                        RemoteIpEndPoint = remoteIpEndPoint
+                    });
+                    LblMessage.Content = $"新设备建立连接，设备地址：{remoteIpEndPoint}";
+                });
+            };
+        }
+
+        private static string GetLocalIpAddress()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+
+            var ipv4 = host.AddressList.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork).ToList();
+
+            if (ipv4.Count == 0) return string.Empty;
+
+            foreach (var ipAddress in ipv4)
+            {
+                var ipStr = ipAddress.ToString().Split('.');
+                if (ipStr[0] == "192") return ipAddress.ToString();
+            }
+
+            return ipv4[0].ToString();
+        }
+
+        private void SwitchTcpServer(object sender, RoutedEventArgs e)
+        {
+            if (_isServerStarted)
+            {
+                _isServerStarted = !_socketServer.Stop();
+            }
+            else
+            {
+                if (!TryParseIpEndPoint(out IPEndPoint endPoint))
+                {
+                    LblMessage.Content = "错误IP地址或端口号！";
+                }
+                else
+                {
+                    _isServerStarted = _socketServer.StartServer(endPoint);
+                }
+            }
+            SwitchServerButton();
+        }
+
+        private void SwitchServerButton()
+        {
+            BtnStartServer.Content = _isServerStarted ? "停止监听" : "开始监听";
+        }
+
+        private bool TryParseIpEndPoint(out IPEndPoint endPoint)
+        {
+            endPoint = null;
+            try
+            {
+                var address = IPAddress.Parse(TxtLocalServerIpAddress.Text);
+                var port = ushort.Parse(TxtLocalServerPort.Text);
+                endPoint = new IPEndPoint(address, port);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
         }
 
         private void AddNewBinFile(object sender, RoutedEventArgs e)
@@ -98,12 +183,12 @@ namespace WDTech_Frimware_Tcp_Loader
         private void SendSelectedBinFile(object sender, RoutedEventArgs e)
         {
             var selectedFileNames = (from object item in LbLoadedBinFile.Items
-                    where item is CheckedBinFile
-                    select item as CheckedBinFile)
+                                     where item is CheckedBinFile
+                                     select item as CheckedBinFile)
                 .Where(f => f.IsChecked).Select(fi => fi.BinFileName).ToList();
             var fileInfos = (from object item in SelectedBinFileTabControl.Items
-                    where item is TabItem
-                    select (BinFileInfomation)((TabItem)item).DataContext)
+                             where item is TabItem
+                             select (BinFileInfomation)((TabItem)item).DataContext)
                 .Where(v => selectedFileNames.Contains(v.FilePath)).ToArray();
             var processControl = GetDownloadProcesser(fileInfos);
             StartDownloadProcess(processControl);
@@ -122,7 +207,7 @@ namespace WDTech_Frimware_Tcp_Loader
                 {
                     LblCurrentDownloadFile.Content = control.CurrentProcessFile;
                     LblFileNeedTobeDownload.Content = control.TotalFileDownloadMissions;
-                    LblCurrentFileIndex.Content = control.CurrentMission;
+                    LblCurrentFileIndex.Content = control.CurrentFileIndex;
                     LblLastSendTime.Content = control.LastSendDateTime == null ? "N/A" : $"{control.LastSendDateTime: HH:mm:ss fff}";
                     LblLastReceiveTime.Content = control.LastReceiveDateTime == null ? "N/A" : $"{control.LastReceiveDateTime: HH:mm:ss fff}";
                     LblTotalSendByteCount.Content = control.TotalSendByteCount == null ? "N/A" : $"{control.TotalSendByteCount}";

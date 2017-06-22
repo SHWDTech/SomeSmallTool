@@ -132,18 +132,18 @@ namespace FirmwareDownloaderHelper
             LastReceiveDateTime = DateTime.Now;
             LastReceiveByteCount = e.ReceiveContent.Length;
             TotalReceiveByteCount += LastReceiveByteCount;
-            if (e.Package.PackageStatus == PackageStatus.DecodeCompleted)
-            {
-                SendAndResetTimeOut();
-            }
-            else if (e.Package.PackageStatus != PackageStatus.BufferHaveNoEnoughLength)
-            {
-                DownloadInterrupt(new DownloadInterruptedEventArgs
-                {
-                    Message = "接收到错误的协议包数据，下载已中断。"
-                });
-            }
-
+            SendAndResetTimeOut();
+            //if (e.Package.PackageStatus == PackageStatus.DecodeCompleted)
+            //{
+            //    SendAndResetTimeOut();
+            //}
+            //else if (e.Package.PackageStatus != PackageStatus.BufferHaveNoEnoughLength)
+            //{
+            //    DownloadInterrupt(new DownloadInterruptedEventArgs
+            //    {
+            //        Message = "接收到错误的协议包数据，下载已中断。"
+            //    });
+            //}
         }
 
         private void DownloadInterrupt(DownloadInterruptedEventArgs e)
