@@ -51,14 +51,13 @@ namespace FirmwareDownloaderHelper.DownloadSender
         public DownloadProcessControl(BinInfo[] binfileInfos, List<IDownloadSender> downloadSenders)
         {
             TotalFileDownloadMissions = binfileInfos.Length * downloadSenders.Count;
-            _downloadUnints = new DownloadUnit[binfileInfos.Length * downloadSenders.Count];
+            _downloadUnints = new DownloadUnit[downloadSenders.Count];
             var index = 0;
             foreach (var currentDownloadSender in downloadSenders)
             {
                 _downloadUnints[index] = new DownloadUnit(binfileInfos, currentDownloadSender);
                 index++;
             }
-
         }
 
         public void StartProcess()
@@ -71,7 +70,7 @@ namespace FirmwareDownloaderHelper.DownloadSender
                 });
                 return;
             }
-            _onProcessUnit = _downloadUnints[CurrentFileIndex];
+            _onProcessUnit = _downloadUnints[_currentUnitIndex];
             _onProcessUnit.DownloadInterrupted += (e) =>
             {
                 if (_currentUnitIndex >= _downloadUnints.Length)

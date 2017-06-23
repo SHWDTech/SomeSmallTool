@@ -53,6 +53,17 @@ namespace WDTech_Frimware_Tcp_Loader
                     LblMessage.Content = $"新设备建立连接，设备地址：{remoteIpEndPoint}";
                 });
             };
+            _socketServer.ClientDisconnected += (e) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    var client = _connectedClients.FirstOrDefault(c => c.RemoteIpEndPoint == e.DisconnectedSocketRemoteEndPoint);
+                    if (client != null)
+                    {
+                        _connectedClients.Remove(client);
+                    }
+                });
+            };
         }
 
         private static string GetLocalIpAddress()
@@ -248,7 +259,7 @@ namespace WDTech_Frimware_Tcp_Loader
             LblMessage.Content = @"开始文件下载。";
         }
 
-        private static DownloadProcessControl GetDownloadProcesser(BinFileInfomation[] infos)
+        private DownloadProcessControl GetDownloadProcesser(BinFileInfomation[] infos)
         {
             var binInfos = infos.Select(i => new BinInfo
             {
@@ -259,7 +270,12 @@ namespace WDTech_Frimware_Tcp_Loader
                 TimeOut = DownloadConfigs.TimeOut
             }).ToArray();
 
-            return new DownloadProcessControl(binInfos, new List<IDownloadSender>());
+            return new DownloadProcessControl(binInfos, GetDownloadSenders());
+        }
+
+        private List<IDownloadSender> GetDownloadSenders()
+        {
+            return _socketServer.ConnectedClients.Select(client => new TcpDownloader(client)).Cast<IDownloadSender>().ToList();
         }
 
         private void OpenDownloadSetting(object sender, RoutedEventArgs e) => new DownloadSetting

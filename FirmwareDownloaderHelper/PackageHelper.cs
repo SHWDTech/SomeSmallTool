@@ -78,15 +78,19 @@ namespace FirmwareDownloaderHelper
 
         public void StartDownload()
         {
+            DownloadSender.SendSuccessed -= SendSuccessed;
             DownloadSender.SendSuccessed += SendSuccessed;
+
+            DownloadSender.SendFailed -= SendFailed;
             DownloadSender.SendFailed += SendFailed;
+
+            DownloadSender.Received -= Received;
             DownloadSender.Received += Received;
             _isDownloading = true;
-
-            SendAndResetTimeOut();
+            Send();
         }
 
-        private void SendAndResetTimeOut()
+        private void Send()
         {
             var sendBytes = Pop();
             if (Pop() == null)
@@ -97,7 +101,6 @@ namespace FirmwareDownloaderHelper
                 });
                 return;
             }
-            ResetTimeOut();
             DownloadSender.Send(sendBytes);
         }
 
@@ -132,18 +135,17 @@ namespace FirmwareDownloaderHelper
             LastReceiveDateTime = DateTime.Now;
             LastReceiveByteCount = e.ReceiveContent.Length;
             TotalReceiveByteCount += LastReceiveByteCount;
-            SendAndResetTimeOut();
-            //if (e.Package.PackageStatus == PackageStatus.DecodeCompleted)
-            //{
-            //    SendAndResetTimeOut();
-            //}
-            //else if (e.Package.PackageStatus != PackageStatus.BufferHaveNoEnoughLength)
-            //{
-            //    DownloadInterrupt(new DownloadInterruptedEventArgs
-            //    {
-            //        Message = "接收到错误的协议包数据，下载已中断。"
-            //    });
-            //}
+            if (e.Package.PackageStatus == PackageStatus.DecodeCompleted)
+            {
+                Send();
+            }
+            else if (e.Package.PackageStatus != PackageStatus.BufferHaveNoEnoughLength)
+            {
+                DownloadInterrupt(new DownloadInterruptedEventArgs
+                {
+                    Message = "接收到错误的协议包数据，下载已中断。"
+                });
+            }
         }
 
         private void DownloadInterrupt(DownloadInterruptedEventArgs e)

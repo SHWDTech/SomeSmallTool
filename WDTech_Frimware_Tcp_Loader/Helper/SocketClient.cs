@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 
 namespace WDTech_Frimware_Tcp_Loader.Helper
 {
@@ -23,7 +25,7 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
 
     public class SocketClientDisconnectedArgs : SocketClientEventArgs
     {
-        
+        public string DisconnectedSocketRemoteEndPoint { get; set; }
     }
 
 
@@ -64,7 +66,10 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
             }
             catch (Exception)
             {
-                ClientDisconnected(new SocketClientDisconnectedArgs());
+                ClientDisconnected(new SocketClientDisconnectedArgs
+                {
+                    DisconnectedSocketRemoteEndPoint = _clientSocket.RemoteEndPoint.ToString()
+                });
             }
         }
 
@@ -75,8 +80,10 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
             {
                 if (_asyncEventArgs.BytesTransferred == 0)
                 {
-                    ClientDisconnected(new SocketClientDisconnectedArgs());
-                    return;
+                    ClientDisconnected(new SocketClientDisconnectedArgs
+                    {
+                        DisconnectedSocketRemoteEndPoint = _clientSocket.RemoteEndPoint.ToString()
+                    });
                 }
                 if (_asyncEventArgs.BytesTransferred > 0 && _asyncEventArgs.SocketError == SocketError.Success)
                 {
@@ -85,11 +92,18 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
                         BytesTransferred = _asyncEventArgs.BytesTransferred,
                         Buffer = _asyncEventArgs.Buffer
                     });
+                    var willRaiseEvent = _clientSocket.ReceiveAsync(_asyncEventArgs); //投递接收请求
+                    if (willRaiseEvent) return;
+                    ProcessReceive();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                ClientDisconnected(new SocketClientDisconnectedArgs());
+                Debug.WriteLine(ex);
+                ClientDisconnected(new SocketClientDisconnectedArgs
+                {
+                    DisconnectedSocketRemoteEndPoint = _clientSocket.RemoteEndPoint.ToString()
+                });
             }
             
         }
