@@ -10,7 +10,7 @@
         MaxHeight="768"
         Background="#C3D7F5"
         MaxWidth="1024"
-        Title="卫东固件升级串口下载器" Height="768" Width="1024">
+        Title="卫东固件升级串口下载器" Height="768" Width="1024" Icon="Resources/application.ico">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="22"></RowDefinition>
