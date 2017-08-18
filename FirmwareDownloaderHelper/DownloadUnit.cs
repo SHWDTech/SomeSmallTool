@@ -61,7 +61,7 @@ namespace FirmwareDownloaderHelper
                 _onProcessHelper = null;
                 DownloadInterrupt(new DownloadInterruptedEventArgs
                 {
-                    Message = "目标设备下载出现错误，下载中断。"
+                    Message = $"目标设备下载出现错误，下载中断。\r\n错误原因：{e.Message}"
                 });
             };
             _onProcessHelper.DownloadFinished += (e) =>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using WDTech_Firmware_Serial_Loader.Extensions;
+using System.Text;
+using FirmwareDownloaderHelper.Extensions;
 
 namespace FirmwareDownloaderHelper
 {
@@ -18,6 +19,19 @@ namespace FirmwareDownloaderHelper
 
         private readonly byte[] _timeOut;
 
+        private byte? _statusCode;
+
+        public override byte? StatusCode
+        {
+            get
+            {
+                if (PackageStatus != PackageStatus.DecodeCompleted) return null;
+                return _statusCode;
+            }
+        }
+
+        public string Description { get; private set; }
+
         public FirmwareUpdatePackage()
         {
             BasicLength = 11;
@@ -29,19 +43,19 @@ namespace FirmwareDownloaderHelper
             ProtocolTail = 0xB1;
         }
 
-        public FirmwareUpdatePackage(ushort totalPackageCount, uint binFileByteLegth, ushort timeOut) : this()
+        public FirmwareUpdatePackage(ushort totalPackageCount,BinInfo info) : this()
         {
             var packageCountBytes = BitConverter.GetBytes(totalPackageCount);
             Array.Reverse(packageCountBytes);
             _totalPackageCount = packageCountBytes;
-            var fileLengthBytes = BitConverter.GetBytes(binFileByteLegth);
+            var fileLengthBytes = BitConverter.GetBytes(info.BinFileLength);
             Array.Reverse(fileLengthBytes);
             _binfileByteLength = fileLengthBytes;
-            var timeOutBtesBytes = BitConverter.GetBytes(timeOut);
+            var timeOutBtesBytes = BitConverter.GetBytes(info.TimeOut);
             Array.Reverse(timeOutBtesBytes);
             _timeOut = timeOutBtesBytes;
             _sender = 0x01;
-            _receiver = 0xFF;
+            _receiver = info.TargetObject;
         }
 
         private void LoadBinFileContent(byte[] binfileContent)
@@ -58,7 +72,7 @@ namespace FirmwareDownloaderHelper
             data.AddRange(_timeOut);
             data.AddRange(binfileContent);
             PayloadData = data.ToArray();
-            PayloadLength = (ushort)(BasicLength + PayloadData.Length);
+            PayloadLength = (ushort)PayloadData.Length;
             var payloaddatalengthBytes = BitConverter.GetBytes(PayloadLength);
             Array.Reverse(payloaddatalengthBytes);
             PayLoadDataLength = payloaddatalengthBytes;
@@ -107,13 +121,13 @@ namespace FirmwareDownloaderHelper
                 return;
             }
             currentIndex += 2;
-            var payloadDataLenth = buffer[currentIndex] << 24 | buffer[currentIndex + 1] << 16 | buffer[currentIndex + 2] << 8 | buffer[currentIndex + 3];
-            if (currentIndex + payloadDataLenth > buffer.Length -3)
+            var payloadDataLenth = buffer[currentIndex] << 8 | buffer[currentIndex + 1];
+            currentIndex += 2;
+            if (currentIndex + payloadDataLenth + 3 > buffer.Length)
             {
                 PackageStatus = PackageStatus.BufferHaveNoEnoughLength;
                 return;
             }
-            currentIndex += 4;
             PayloadData = buffer.SubArray(currentIndex, payloadDataLenth);
             currentIndex += payloadDataLenth;
             CrcCheck = buffer.SubArray(currentIndex, 2);
@@ -122,12 +136,15 @@ namespace FirmwareDownloaderHelper
                 PackageStatus = PackageStatus.CrcCheckFaild;
                 return;
             }
-            currentIndex++;
+            currentIndex += 2;
             if (buffer[currentIndex] != ProtocolTail)
             {
                 PackageStatus = PackageStatus.InvalidTail;
                 return;
             }
+
+            _statusCode = PayloadData[14];
+            Description = Encoding.GetEncoding("GBK").GetString(PayloadData, 15, PayloadData.Length - 15);
             PackageStatus = PackageStatus.DecodeCompleted;
         }
     }

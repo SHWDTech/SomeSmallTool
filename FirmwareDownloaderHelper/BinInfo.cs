@@ -11,5 +11,7 @@
         public ushort TimeOut { get; set; }
 
         public byte[] BinFileBytes { get; set; }
+
+        public byte TargetObject { get; set; }
     }
 }

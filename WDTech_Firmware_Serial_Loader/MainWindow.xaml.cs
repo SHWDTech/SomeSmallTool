@@ -218,7 +218,8 @@ namespace WDTech_Firmware_Serial_Loader
                 BinFileBytes = File.ReadAllBytes(i.FilePath),
                 BinFileLength = (uint)new FileInfo(i.FilePath).Length,
                 PackageBinLength = DownloadConfigs.PackageBinFileLength,
-                TimeOut = DownloadConfigs.TimeOut
+                TimeOut = DownloadConfigs.TimeOut,
+                TargetObject = i.TargetObject
             }).ToArray();
 
             return new DownloadProcessControl(binInfos, _portDownloader);

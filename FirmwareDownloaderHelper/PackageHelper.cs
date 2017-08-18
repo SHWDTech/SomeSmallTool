@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using FirmwareDownloaderHelper.DownloadSender;
 using System.Timers;
-using WDTech_Firmware_Serial_Loader.Extensions;
+using FirmwareDownloaderHelper.Extensions;
 
 namespace FirmwareDownloaderHelper
 {
@@ -44,7 +45,7 @@ namespace FirmwareDownloaderHelper
             var rest = info.BinFileLength % info.PackageBinLength;
             var fullPackageCount = info.BinFileLength / info.PackageBinLength;
             var totalPackageCount = rest == 0 ? (ushort)fullPackageCount : (ushort)(fullPackageCount + 1);
-            _package = new FirmwareUpdatePackage(totalPackageCount, info.BinFileLength, info.TimeOut);
+            _package = new FirmwareUpdatePackage(totalPackageCount, info);
             _timerOutTimer = new Timer
             {
                 Interval = _binInfo.TimeOut * 1000,
@@ -56,7 +57,7 @@ namespace FirmwareDownloaderHelper
                 DownloadSender.Received -= Received;
                 DownloadInterrupt(new DownloadInterruptedEventArgs
                 {
-                    Message = "等待回复超时，下载中断。"
+                    Message = "等待回复超时。"
                 });
                 _timerOutTimer.Stop();
             };
@@ -87,13 +88,14 @@ namespace FirmwareDownloaderHelper
             DownloadSender.Received -= Received;
             DownloadSender.Received += Received;
             _isDownloading = true;
+            Debug.WriteLine($"Start:{DateTime.Now:T}\r\n");
             Send();
         }
 
         private void Send()
         {
             var sendBytes = Pop();
-            if (Pop() == null)
+            if (sendBytes == null)
             {
                 DownloadFinish(new DownloadFinishedEventArgs
                 {
@@ -102,6 +104,7 @@ namespace FirmwareDownloaderHelper
                 return;
             }
             DownloadSender.Send(sendBytes);
+            Debug.WriteLine($"Send:DateTime:{DateTime.Now:T}, Content:{sendBytes.ToHexString()}");
         }
 
         private void SendSuccessed(DownloadSenderSendEventArgs e)
@@ -124,7 +127,7 @@ namespace FirmwareDownloaderHelper
             _timerOutTimer.Stop();
             DownloadInterrupt(new DownloadInterruptedEventArgs
             {
-                Message = "发送数据失败，下载已中断，请检查串口连接。",
+                Message = "发送数据失败，请检查串口连接。",
                 Exception = e.Exception
             });
         }
@@ -135,15 +138,26 @@ namespace FirmwareDownloaderHelper
             LastReceiveDateTime = DateTime.Now;
             LastReceiveByteCount = e.ReceiveContent.Length;
             TotalReceiveByteCount += LastReceiveByteCount;
+
             if (e.Package.PackageStatus == PackageStatus.DecodeCompleted)
             {
-                Send();
+                if (e.Package.StatusCode != 0)
+                {
+                    DownloadInterrupt(new DownloadInterruptedEventArgs
+                    {
+                        Message = $"数据下载错误，错误信息：{e.Package.Description}。"
+                    });
+                }
+                else
+                {
+                    Send();
+                }
             }
             else if (e.Package.PackageStatus != PackageStatus.BufferHaveNoEnoughLength)
             {
                 DownloadInterrupt(new DownloadInterruptedEventArgs
                 {
-                    Message = "接收到错误的协议包数据，下载已中断。"
+                    Message = $"接收到错误的协议包数据，错误原因：{e.Package.PackageStatus}，数据包：{e.Package.DecodeBuffer.ToHexString()}"
                 });
             }
         }

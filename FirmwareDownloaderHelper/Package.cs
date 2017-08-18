@@ -11,6 +11,8 @@ namespace FirmwareDownloaderHelper
 
         public PackageStatus PackageStatus { get; protected set; } = PackageStatus.Unpackaged;
 
+        public byte[] DecodeBuffer { get; protected set; }
+
         internal Package()
         {            
         }
@@ -33,6 +35,8 @@ namespace FirmwareDownloaderHelper
 
         public byte ProtocolTail { get; protected set; }
 
+        public virtual byte? StatusCode { get; set; }
+
         public virtual byte[] EncodeFrame()
         {
             var frame = new List<byte> {ProtocolHead, CommandType, CommandByte, OperateCode};
@@ -51,7 +55,7 @@ namespace FirmwareDownloaderHelper
 
         public virtual void DecodeFrame(byte[] buffer)
         {
-
+            DecodeBuffer = buffer;
         }
     }
 }

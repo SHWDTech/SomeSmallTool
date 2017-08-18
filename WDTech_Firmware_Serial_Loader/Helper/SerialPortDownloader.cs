@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Ports;
-using System.Text;
+using System.Threading;
 using FirmwareDownloaderHelper.DownloadSender;
 using FirmwareDownloaderHelper;
+using FirmwareDownloaderHelper.Extensions;
 
 namespace WDTech_Firmware_Serial_Loader.Helper
 {
@@ -18,12 +20,22 @@ namespace WDTech_Firmware_Serial_Loader.Helper
             _portHelper = portHelper;
             _portHelper.DataReceived += (sender, e) =>
             {
-                var readBytes = Encoding.UTF8.GetBytes(((SerialPort)sender).ReadExisting());
-                _buffer.AddRange(readBytes);
+                var port = sender as SerialPort;
+                if (port == null) return;
+                var readBytes = new List<byte>();
+                lock (_buffer)
+                {
+                    while (port.BytesToRead > 0)
+                    {
+                        readBytes.Add((byte)port.ReadByte());
+                    }
+                    _buffer.AddRange(readBytes);
+                }
                 var package = DecodePackage();
+                Debug.WriteLine($"Received, Time:{DateTime.Now:T}, Content:{readBytes.ToArray().ToHexString()}");
                 Received?.Invoke(new DownloadSenderReceivedArgs
                 {
-                    ReceiveContent = readBytes,
+                    ReceiveContent = readBytes.ToArray(),
                     Package = package
                 });
             };
@@ -33,6 +45,7 @@ namespace WDTech_Firmware_Serial_Loader.Helper
         {
             try
             {
+                Thread.Sleep(5);
                 _portHelper.SendBytes(content);
                 SendSuccessed?.Invoke(new DownloadSenderSendEventArgs
                 {
@@ -65,7 +78,7 @@ namespace WDTech_Firmware_Serial_Loader.Helper
             {
                 return package;
             }
-            else if (package.PackageStatus != PackageStatus.DecodeCompleted)
+            else
             {
                 _buffer.Clear();
             }

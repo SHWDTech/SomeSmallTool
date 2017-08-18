@@ -8,7 +8,7 @@ namespace FirmwareDownloaderHelper
 {
     public class BinFileInfomation
     {
-        private byte _targetObject;
+        public byte TargetObject { get; private set; }
 
         private byte[] _binFileSize;
 
@@ -29,7 +29,7 @@ namespace FirmwareDownloaderHelper
             
         }
 
-        public string TargetObject => BinFileOptionsHelper.GetUpdateTarget(_targetObject.ToString()); 
+        public string TargetObjectString => BinFileOptionsHelper.GetUpdateTarget(TargetObject.ToString()); 
 
         public string FilePath { get; set; }
 
@@ -80,7 +80,7 @@ namespace FirmwareDownloaderHelper
             try
             {
                 var head = reader.ReadByte();
-                info._targetObject = reader.ReadByte();
+                info.TargetObject = reader.ReadByte();
                 info._binFileSize = reader.ReadBytes(4);
                 info._updateMode = reader.ReadBytes(2);
                 info._firmwareReleaseDate = reader.ReadBytes(6);
@@ -97,7 +97,7 @@ namespace FirmwareDownloaderHelper
                     info = null;
                     return false;
                 }
-                var descCheck = new List<byte> {head, info._targetObject};
+                var descCheck = new List<byte> {head, info.TargetObject };
                 var binSize = new byte[4];
                 info._binFileSize.CopyTo(binSize, 0);
                 descCheck.AddRange(binSize);

@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Text;
 
-namespace WDTech_Firmware_Serial_Loader.Extensions
+namespace FirmwareDownloaderHelper.Extensions
 {
     public static class ArrayExtension
     {
@@ -9,6 +10,16 @@ namespace WDTech_Firmware_Serial_Loader.Extensions
             var result = new T[length];
             Array.Copy(data, index, result, 0, length);
             return result;
+        }
+
+        public static string ToHexString(this byte[] data)
+        {
+            var builder = new StringBuilder();
+            foreach (var b in data)
+            {
+                builder.Append($"{b:X2}".PadRight(3, ' '));
+            }
+            return builder.ToString();
         }
     }
 }
