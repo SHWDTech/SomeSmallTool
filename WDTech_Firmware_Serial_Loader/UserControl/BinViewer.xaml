@@ -47,7 +47,7 @@
                 </StackPanel>
                 <StackPanel Orientation="Vertical" Margin="0, 10, 0, 0">
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="版本描述（总长度233个Yuri）"></Label>
+                        <Label Content="版本描述（总长度233个字节）"></Label>
                         <TextBox x:Name="TxtDescribeUsed" IsReadOnly="True" Width="45" Background="#f0f0f0" VerticalContentAlignment="Center" Text="{Binding Path=DescriptionLength, Mode=OneWay }"></TextBox>
                         <Label Content="已使用"></Label>
                     </StackPanel>
