@@ -58,7 +58,7 @@ namespace FirmwareDownloaderHelper
             data.AddRange(_timeOut);
             data.AddRange(binfileContent);
             PayloadData = data.ToArray();
-            PayloadLength = (uint)(BasicLength + PayloadData.Length);
+            PayloadLength = (ushort)(BasicLength + PayloadData.Length);
             var payloaddatalengthBytes = BitConverter.GetBytes(PayloadLength);
             Array.Reverse(payloaddatalengthBytes);
             PayLoadDataLength = payloaddatalengthBytes;
