@@ -5,7 +5,7 @@ namespace FirmwareDownloaderHelper
 {
     public class Package
     {
-        protected uint PayloadLength;
+        protected ushort PayloadLength;
 
         protected ushort BasicLength;
 
