@@ -95,8 +95,8 @@
                                 </Grid>
                                 <Grid Row="2">
                                     <StackPanel Orientation="Horizontal">
-                                        <Button Content="下载当前BIN文件" Width="125" Click="SendCurrentBinFile"></Button>
-                                        <Button Content="下载选中的BIN文件" Width="125" Margin="35, 0, 0, 0" Click="SendSelectedBinFile"></Button>
+                                        <Button x:Name="BtnSendCurrentBinFile" Content="下载当前BIN文件" Width="125" Click="SendCurrentBinFile"></Button>
+                                        <Button x:Name="BtnSendSelectedBinFile" Content="下载选中的BIN文件" Width="125" Margin="35, 0, 0, 0" Click="SendSelectedBinFile"></Button>
                                     </StackPanel>
                                 </Grid>
                             </Grid>
