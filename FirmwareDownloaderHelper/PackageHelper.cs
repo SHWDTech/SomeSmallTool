@@ -37,8 +37,6 @@ namespace FirmwareDownloaderHelper
 
         public double DownloadProgress { get; private set; }
 
-        private bool _isWaitingForFinish;
-
         public PackageHelper(BinInfo info, IDownloadSender downloadSender)
         {
             _binInfo = info;
@@ -97,7 +95,10 @@ namespace FirmwareDownloaderHelper
             var sendBytes = Pop();
             if (sendBytes == null)
             {
-                _isWaitingForFinish = true;
+                DownloadFinish(new DownloadFinishedEventArgs
+                {
+                    Message = @"升级文件下载完成。"
+                });
                 return;
             }
             DownloadSender.Send(sendBytes);
@@ -146,17 +147,7 @@ namespace FirmwareDownloaderHelper
                 }
                 else
                 {
-                    if (_isWaitingForFinish)
-                    {
-                        DownloadFinish(new DownloadFinishedEventArgs
-                        {
-                            Message = @"升级文件下载完成。"
-                        });
-                    }
-                    else
-                    {
-                        Send();
-                    }
+                    Send();
                 }
             }
             else if (e.Package.PackageStatus != PackageStatus.BufferHaveNoEnoughLength)
