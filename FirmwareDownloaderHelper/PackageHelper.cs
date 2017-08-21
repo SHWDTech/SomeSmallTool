@@ -98,6 +98,7 @@ namespace FirmwareDownloaderHelper
             if (sendBytes == null)
             {
                 _isWaitingForFinish = true;
+                return;
             }
             DownloadSender.Send(sendBytes);
         }

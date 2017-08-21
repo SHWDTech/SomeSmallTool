@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO.Ports;
 using System.Threading;
 using FirmwareDownloaderHelper.DownloadSender;
 using FirmwareDownloaderHelper;
-using FirmwareDownloaderHelper.Extensions;
 
 namespace WDTech_Firmware_Serial_Loader.Helper
 {
@@ -32,7 +30,6 @@ namespace WDTech_Firmware_Serial_Loader.Helper
                     _buffer.AddRange(readBytes);
                 }
                 var package = DecodePackage();
-                Debug.WriteLine($"Received, Time:{DateTime.Now:T}, Content:{readBytes.ToArray().ToHexString()}");
                 Received?.Invoke(new DownloadSenderReceivedArgs
                 {
                     ReceiveContent = readBytes.ToArray(),
