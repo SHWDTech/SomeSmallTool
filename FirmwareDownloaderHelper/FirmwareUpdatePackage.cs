@@ -48,7 +48,7 @@ namespace FirmwareDownloaderHelper
             var packageCountBytes = BitConverter.GetBytes(totalPackageCount);
             Array.Reverse(packageCountBytes);
             _totalPackageCount = packageCountBytes;
-            var fileLengthBytes = BitConverter.GetBytes(info.BinFileLength);
+            var fileLengthBytes = BitConverter.GetBytes(info.BinConfigFileLength);
             Array.Reverse(fileLengthBytes);
             _binfileByteLength = fileLengthBytes;
             var timeOutBtesBytes = BitConverter.GetBytes(info.TimeOut);

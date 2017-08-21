@@ -241,6 +241,7 @@ namespace WDTech_Firmware_Serial_Loader
             {
                 BinConfigFileFullPathWithName = i.FilePath,
                 BinConfigFileBytes = File.ReadAllBytes(i.FilePath),
+                BinConfigFileLength = (uint)new FileInfo(i.FilePath).Length,
                 BinFileLength = (uint)i.BinFileSize,
                 PackageBinLength = DownloadConfigs.PackageBinFileLength,
                 TimeOut = DownloadConfigs.TimeOut,

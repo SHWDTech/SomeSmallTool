@@ -8,6 +8,8 @@
 
         public uint BinFileLength { get; set; }
 
+        public uint BinConfigFileLength { get; set; }
+
         public ushort TimeOut { get; set; }
 
         public byte[] BinConfigFileBytes { get; set; }

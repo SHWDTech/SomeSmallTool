@@ -41,8 +41,8 @@ namespace FirmwareDownloaderHelper
         {
             _binInfo = info;
             DownloadSender = downloadSender;
-            var rest = info.BinFileLength % info.PackageBinLength;
-            var fullPackageCount = info.BinFileLength / info.PackageBinLength;
+            var rest = info.BinConfigFileLength % info.PackageBinLength;
+            var fullPackageCount = info.BinConfigFileLength / info.PackageBinLength;
             var totalPackageCount = rest == 0 ? (ushort)fullPackageCount : (ushort)(fullPackageCount + 1);
             _package = new FirmwareUpdatePackage(totalPackageCount, info);
             _timerOutTimer = new Timer
@@ -71,8 +71,8 @@ namespace FirmwareDownloaderHelper
                 return null;
             }
             var binLength = remainbyteLength > _binInfo.PackageBinLength ? _binInfo.PackageBinLength : remainbyteLength;
-            var binfileContent = _binInfo.BinConfigFileBytes.SubArray(startIndex, binLength);
-            DownloadProgress = (double)startIndex / _binInfo.BinFileLength * 100.0;
+            var binfileContent = startIndex == 0 ? new byte[0] : _binInfo.BinConfigFileBytes.SubArray(startIndex, binLength);
+            DownloadProgress = (double)startIndex / _binInfo.BinConfigFileLength * 100.0;
             return _package.NextPackage(binfileContent);
         }
 
