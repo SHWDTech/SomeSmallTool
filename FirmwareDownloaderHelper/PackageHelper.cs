@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using FirmwareDownloaderHelper.DownloadSender;
 using System.Timers;
 using FirmwareDownloaderHelper.Extensions;
@@ -37,6 +36,8 @@ namespace FirmwareDownloaderHelper
         public int LastReceiveByteCount { get; private set; }
 
         public double DownloadProgress { get; private set; }
+
+        private bool _isWaitingForFinish;
 
         public PackageHelper(BinInfo info, IDownloadSender downloadSender)
         {
@@ -88,7 +89,6 @@ namespace FirmwareDownloaderHelper
             DownloadSender.Received -= Received;
             DownloadSender.Received += Received;
             _isDownloading = true;
-            Debug.WriteLine($"Start:{DateTime.Now:T}\r\n");
             Send();
         }
 
@@ -97,14 +97,9 @@ namespace FirmwareDownloaderHelper
             var sendBytes = Pop();
             if (sendBytes == null)
             {
-                DownloadFinish(new DownloadFinishedEventArgs
-                {
-                    Message = @"升级文件下载完成。"
-                });
-                return;
+                _isWaitingForFinish = true;
             }
             DownloadSender.Send(sendBytes);
-            Debug.WriteLine($"Send:DateTime:{DateTime.Now:T}, Content:{sendBytes.ToHexString()}");
         }
 
         private void SendSuccessed(DownloadSenderSendEventArgs e)
@@ -150,7 +145,17 @@ namespace FirmwareDownloaderHelper
                 }
                 else
                 {
-                    Send();
+                    if (_isWaitingForFinish)
+                    {
+                        DownloadFinish(new DownloadFinishedEventArgs
+                        {
+                            Message = @"升级文件下载完成。"
+                        });
+                    }
+                    else
+                    {
+                        Send();
+                    }
                 }
             }
             else if (e.Package.PackageStatus != PackageStatus.BufferHaveNoEnoughLength)
