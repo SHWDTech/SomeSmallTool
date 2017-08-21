@@ -263,8 +263,8 @@ namespace WDTech_Frimware_Tcp_Loader
         {
             var binInfos = infos.Select(i => new BinInfo
             {
-                BinFileFullPathWithName = i.FilePath,
-                BinFileBytes = File.ReadAllBytes(i.FilePath),
+                BinConfigFileFullPathWithName = i.FilePath,
+                BinConfigFileBytes = File.ReadAllBytes(i.FilePath),
                 BinFileLength = (uint)new FileInfo(i.FilePath).Length,
                 PackageBinLength = DownloadConfigs.PackageBinFileLength,
                 TimeOut = DownloadConfigs.TimeOut

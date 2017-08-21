@@ -21,7 +21,7 @@ namespace FirmwareDownloaderHelper
 
         public event DownloadFinished DownloadFinished;
 
-        public string BinFileFullPathWithName => _binInfo.BinFileFullPathWithName;
+        public string BinFileFullPathWithName => _binInfo.BinConfigFileFullPathWithName;
 
         public DateTime LastSendDateTime { get; private set; }
 
@@ -65,13 +65,13 @@ namespace FirmwareDownloaderHelper
         public byte[] Pop()
         {
             var startIndex = _package.CurrentIndex * _binInfo.PackageBinLength;
-            var remainbyteLength = _binInfo.BinFileBytes.Length - startIndex;
+            var remainbyteLength = _binInfo.BinConfigFileBytes.Length - startIndex;
             if (remainbyteLength <= 0)
             {
                 return null;
             }
             var binLength = remainbyteLength > _binInfo.PackageBinLength ? _binInfo.PackageBinLength : remainbyteLength;
-            var binfileContent = _binInfo.BinFileBytes.SubArray(startIndex, binLength);
+            var binfileContent = _binInfo.BinConfigFileBytes.SubArray(startIndex, binLength);
             DownloadProgress = (double)startIndex / _binInfo.BinFileLength * 100.0;
             return _package.NextPackage(binfileContent);
         }

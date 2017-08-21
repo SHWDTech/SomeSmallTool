@@ -2,7 +2,7 @@
 {
     public class BinInfo
     {
-        public string BinFileFullPathWithName { get; set; }
+        public string BinConfigFileFullPathWithName { get; set; }
 
         public ushort PackageBinLength { get; set; }
 
@@ -10,7 +10,7 @@
 
         public ushort TimeOut { get; set; }
 
-        public byte[] BinFileBytes { get; set; }
+        public byte[] BinConfigFileBytes { get; set; }
 
         public byte TargetObject { get; set; }
     }
