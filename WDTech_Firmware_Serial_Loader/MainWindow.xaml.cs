@@ -205,12 +205,12 @@ namespace WDTech_Firmware_Serial_Loader
                 updateTimer.Dispose();
                 Dispatcher.Invoke(() =>
                 {
-                    BarTotalDownloadProgress.Value = 100;
+                    BarTotalDownloadProgress.Value = BarCurrentDownloadProgress.Value = 100;
                     _messageBarMessage = @"下载完成。";
                     MessageBox.Show(e.Message, "系统信息", MessageBoxButton.OK, MessageBoxImage.Information);
                     BtnSwitchSerialPortStatus.IsEnabled = true;
+                    UpdateDownloadBtnStatus(true);
                 });
-                UpdateDownloadBtnStatus(true);
             };
             control.ProcessInterrupted += (e) =>
             {
@@ -221,8 +221,8 @@ namespace WDTech_Firmware_Serial_Loader
                     _messageBarMessage = @"下载已中断。";
                     MessageBox.Show(e.Message, "系统信息", MessageBoxButton.OK, MessageBoxImage.Warning);
                     BtnSwitchSerialPortStatus.IsEnabled = true;
+                    UpdateDownloadBtnStatus(true);
                 });
-                UpdateDownloadBtnStatus(true);
             };
 
             control.StartProcess();
