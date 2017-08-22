@@ -22,12 +22,14 @@
             <Image Source="/Resources/serial_logo.png"></Image>
         </Grid>
         <Grid Row="1">
-            <Menu FontSize="14">
-                <MenuItem Header="设置">
-                    <MenuItem Header="更新配置信息"></MenuItem>
-                    <MenuItem Header="下载功能设置" Click="OpenDownloadSetting"></MenuItem>
-                </MenuItem>
-            </Menu>
+            <Border BorderThickness="0, 0, 0, 1.5" BorderBrush="White">
+                <Menu FontSize="14" Background="#C3D7F5">
+                    <MenuItem Header="设置">
+                        <MenuItem Header="更新配置信息"></MenuItem>
+                        <MenuItem Header="下载功能设置" Click="OpenDownloadSetting"></MenuItem>
+                    </MenuItem>
+                </Menu>
+            </Border>
         </Grid>
         <Grid Row="2">
             <Grid.ColumnDefinitions>
