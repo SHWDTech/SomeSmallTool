@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using FirmwareDownloaderHelper.DownloadSender;
 using System.Timers;
 using FirmwareDownloaderHelper.Extensions;
@@ -16,6 +17,8 @@ namespace FirmwareDownloaderHelper
         private bool _isDownloading;
 
         private readonly Timer _timerOutTimer;
+
+        private FirmwareUpdatePackage _lastReceivedPackage;
 
         public event DownloadInterrupted DownloadInterrupted;
 
@@ -64,14 +67,15 @@ namespace FirmwareDownloaderHelper
 
         public byte[] Pop()
         {
-            var startIndex = _package.CurrentIndex * _binInfo.PackageBinLength;
+            var startIndex = _package.CurrentIndex == 0 ? 0 : (_package.CurrentIndex - 1) * _binInfo.PackageBinLength;
             var remainbyteLength = _binInfo.BinConfigFileBytes.Length - startIndex;
             if (remainbyteLength <= 0)
             {
                 return null;
             }
             var binLength = remainbyteLength > _binInfo.PackageBinLength ? _binInfo.PackageBinLength : remainbyteLength;
-            var binfileContent = startIndex == 0 ? new byte[0] : _binInfo.BinConfigFileBytes.SubArray(startIndex, binLength);
+            if (_package.CurrentIndex == 0) binLength = 0;
+            var binfileContent =_binInfo.BinConfigFileBytes.SubArray(startIndex, binLength);
             DownloadProgress = (double)startIndex / _binInfo.BinConfigFileLength * 100.0;
             return _package.NextPackage(binfileContent);
         }
@@ -95,6 +99,15 @@ namespace FirmwareDownloaderHelper
             var sendBytes = Pop();
             if (sendBytes == null)
             {
+                if (!_lastReceivedPackage.PayloadData.SubArray(2, 2)
+                    .SequenceEqual(_lastReceivedPackage.PayloadData.SubArray(4, 2)))
+                {
+                    DownloadInterrupt(new DownloadInterruptedEventArgs
+                    {
+                        Message = @"下载中断，总包数与实际发送包数不符。"
+                    });
+                    return;
+                }
                 DownloadFinish(new DownloadFinishedEventArgs
                 {
                     Message = @"升级文件下载完成。"
@@ -147,6 +160,7 @@ namespace FirmwareDownloaderHelper
                 }
                 else
                 {
+                    _lastReceivedPackage = e.Package;
                     Send();
                 }
             }
