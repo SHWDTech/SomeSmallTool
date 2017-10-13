@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using FirmwareDownloaderHelper.DownloadSender;
 using System.Timers;
@@ -97,6 +98,7 @@ namespace FirmwareDownloaderHelper
         private void Send()
         {
             var sendBytes = Pop();
+            Debug.WriteLine($"SendBytes:{sendBytes?.ToHexString()}");
             if (sendBytes == null)
             {
                 if (!_lastReceivedPackage.PayloadData.SubArray(2, 2)
@@ -164,7 +166,7 @@ namespace FirmwareDownloaderHelper
                     Send();
                 }
             }
-            else if (e.Package.PackageStatus != PackageStatus.BufferHaveNoEnoughLength)
+            else if (e.Package.PackageStatus == PackageStatus.CrcCheckFaild)
             {
                 DownloadInterrupt(new DownloadInterruptedEventArgs
                 {

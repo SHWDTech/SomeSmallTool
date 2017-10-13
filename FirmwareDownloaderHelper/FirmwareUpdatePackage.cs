@@ -21,14 +21,8 @@ namespace FirmwareDownloaderHelper
 
         private byte? _statusCode;
 
-        public override byte? StatusCode
-        {
-            get
-            {
-                if (PackageStatus != PackageStatus.DecodeCompleted) return null;
-                return _statusCode;
-            }
-        }
+        public override byte? StatusCode 
+            => PackageStatus != PackageStatus.DecodeCompleted ? null : _statusCode;
 
         public string Description { get; private set; }
 
@@ -131,7 +125,7 @@ namespace FirmwareDownloaderHelper
             PayloadData = buffer.SubArray(currentIndex, payloadDataLenth);
             currentIndex += payloadDataLenth;
             CrcCheck = buffer.SubArray(currentIndex, 2);
-            if (CrcCheckSum.GetUsmbcrc16(buffer, buffer.Length - 3) != (CrcCheck[0] << 8 | CrcCheck[1]))
+            if (CrcCheckSum.GetUsmbcrc16(buffer, currentIndex) != (CrcCheck[0] << 8 | CrcCheck[1]))
             {
                 PackageStatus = PackageStatus.CrcCheckFaild;
                 return;
