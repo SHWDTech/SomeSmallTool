@@ -8,6 +8,8 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
 
     public delegate void Disconnected(SocketClientDisconnectedArgs args);
 
+    public delegate void ServerClosed();
+
     public class SocketClientEventArgs
     {
         public string Message { get; set; }

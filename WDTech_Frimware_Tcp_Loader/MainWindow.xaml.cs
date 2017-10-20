@@ -64,6 +64,13 @@ namespace WDTech_Frimware_Tcp_Loader
                     }
                 });
             };
+            _socketServer.ServerClosed += () =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    _connectedClients.Clear();
+                });
+            };
         }
 
         private static string GetLocalIpAddress()

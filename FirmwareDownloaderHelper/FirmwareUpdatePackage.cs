@@ -13,6 +13,10 @@ namespace FirmwareDownloaderHelper
 
         public ushort CurrentIndex { get; private set; }
 
+        public int PackageLength => _decodeIndex + 1;
+
+        private int _decodeIndex;
+
         private readonly byte[] _totalPackageCount;
 
         private readonly byte[] _binfileByteLength;
@@ -21,10 +25,10 @@ namespace FirmwareDownloaderHelper
 
         private byte? _statusCode;
 
-        public override byte? StatusCode 
+        public override byte? StatusCode
             => PackageStatus != PackageStatus.DecodeCompleted ? null : _statusCode;
 
-        public string Description { get; private set; }
+        public string Description { get; private set; } = "无";
 
         public FirmwareUpdatePackage()
         {
@@ -37,7 +41,7 @@ namespace FirmwareDownloaderHelper
             ProtocolTail = 0xB1;
         }
 
-        public FirmwareUpdatePackage(ushort totalPackageCount,BinInfo info) : this()
+        public FirmwareUpdatePackage(ushort totalPackageCount, BinInfo info) : this()
         {
             var packageCountBytes = BitConverter.GetBytes(totalPackageCount);
             Array.Reverse(packageCountBytes);
@@ -54,12 +58,12 @@ namespace FirmwareDownloaderHelper
 
         private void LoadBinFileContent(byte[] binfileContent)
         {
-            var data = new List<byte> {_sender, _receiver};
+            var data = new List<byte> { _sender, _receiver };
             var currentIndexBytes = BitConverter.GetBytes(CurrentIndex);
             Array.Reverse(currentIndexBytes);
             data.AddRange(currentIndexBytes);
             data.AddRange(_totalPackageCount);
-            var binfileDataLength = BitConverter.GetBytes((ushort) binfileContent.Length);
+            var binfileDataLength = BitConverter.GetBytes((ushort)binfileContent.Length);
             Array.Reverse(binfileDataLength);
             data.AddRange(binfileDataLength);
             data.AddRange(_binfileByteLength);
@@ -88,57 +92,60 @@ namespace FirmwareDownloaderHelper
                 PackageStatus = PackageStatus.BufferHaveNoEnoughLength;
                 return;
             }
-            var currentIndex = 0;
-            if (buffer[currentIndex] != ProtocolHead)
+            _decodeIndex = 0;
+            if (buffer[_decodeIndex] != ProtocolHead)
             {
                 PackageStatus = PackageStatus.InvalidHead;
                 return;
             }
-            currentIndex++;
-            if (buffer[currentIndex] != CommandType)
+            _decodeIndex++;
+            if (buffer[_decodeIndex] != CommandType)
             {
                 PackageStatus = PackageStatus.ComponentError;
                 return;
             }
-            currentIndex++;
-            if (buffer[currentIndex] != CommandByte)
+            _decodeIndex++;
+            if (buffer[_decodeIndex] != CommandByte)
             {
                 PackageStatus = PackageStatus.ComponentError;
                 return;
             }
-            currentIndex++;
-            OperateCode = buffer[currentIndex];
-            currentIndex++;
-            if (buffer[currentIndex] != RequestCode[0] || buffer[currentIndex + 1] != RequestCode[1])
+            _decodeIndex++;
+            OperateCode = buffer[_decodeIndex];
+            _decodeIndex++;
+            if (buffer[_decodeIndex] != RequestCode[0] || buffer[_decodeIndex + 1] != RequestCode[1])
             {
                 PackageStatus = PackageStatus.ComponentError;
                 return;
             }
-            currentIndex += 2;
-            var payloadDataLenth = buffer[currentIndex] << 8 | buffer[currentIndex + 1];
-            currentIndex += 2;
-            if (currentIndex + payloadDataLenth + 3 > buffer.Length)
+            _decodeIndex += 2;
+            var payloadDataLenth = buffer[_decodeIndex] << 8 | buffer[_decodeIndex + 1];
+            _decodeIndex += 2;
+            if (_decodeIndex + payloadDataLenth + 3 > buffer.Length)
             {
                 PackageStatus = PackageStatus.BufferHaveNoEnoughLength;
                 return;
             }
-            PayloadData = buffer.SubArray(currentIndex, payloadDataLenth);
-            currentIndex += payloadDataLenth;
-            CrcCheck = buffer.SubArray(currentIndex, 2);
-            if (CrcCheckSum.GetUsmbcrc16(buffer, currentIndex) != (CrcCheck[0] << 8 | CrcCheck[1]))
+            PayloadData = buffer.SubArray(_decodeIndex, payloadDataLenth);
+            _decodeIndex += payloadDataLenth;
+            CrcCheck = buffer.SubArray(_decodeIndex, 2);
+            if (CrcCheckSum.GetUsmbcrc16(buffer, _decodeIndex) != (CrcCheck[0] << 8 | CrcCheck[1]))
             {
                 PackageStatus = PackageStatus.CrcCheckFaild;
                 return;
             }
-            currentIndex += 2;
-            if (buffer[currentIndex] != ProtocolTail)
+            _decodeIndex += 2;
+            if (buffer[_decodeIndex] != ProtocolTail)
             {
                 PackageStatus = PackageStatus.InvalidTail;
                 return;
             }
 
             _statusCode = PayloadData[14];
-            Description = Encoding.GetEncoding("GBK").GetString(PayloadData, 15, PayloadData.Length - 15);
+            if (PayloadData.Length > 15)
+            {
+                Description = Encoding.GetEncoding("GBK").GetString(PayloadData, 15, PayloadData.Length - 15);
+            }
             PackageStatus = PackageStatus.DecodeCompleted;
         }
     }

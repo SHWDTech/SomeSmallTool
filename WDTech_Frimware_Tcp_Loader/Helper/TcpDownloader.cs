@@ -58,22 +58,23 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
         {
             var package = new FirmwareUpdatePackage();
             package.DecodeFrame(_buffer.ToArray());
-            if (package.PackageStatus == PackageStatus.BufferHaveNoEnoughLength)
+            Debug.WriteLine(package.PackageStatus);
+            while (true)
             {
-                return package;
-            }
-            if (package.PackageStatus != PackageStatus.DecodeCompleted)
-            {
+                if (package.PackageStatus == PackageStatus.BufferHaveNoEnoughLength) break;
+                if (package.PackageStatus == PackageStatus.DecodeCompleted)
+                {
+                    _buffer.RemoveRange(0, package.PackageLength);
+                    break;
+                }
                 if (_buffer.Count > 0)
                 {
                     _buffer.RemoveAt(0);
                 }
-                DecodePackage();
+                package.DecodeFrame(_buffer.ToArray());
+                Debug.WriteLine(package.PackageStatus);
             }
-            else
-            {
-                _buffer.RemoveRange(0, package.CurrentIndex);
-            }
+
             return package;
         }
 

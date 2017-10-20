@@ -21,6 +21,8 @@ namespace FirmwareDownloaderHelper
 
         private FirmwareUpdatePackage _lastReceivedPackage;
 
+        private byte[] _lastSendPayloadData;
+
         public event DownloadInterrupted DownloadInterrupted;
 
         public event DownloadFinished DownloadFinished;
@@ -76,7 +78,7 @@ namespace FirmwareDownloaderHelper
             }
             var binLength = remainbyteLength > _binInfo.PackageBinLength ? _binInfo.PackageBinLength : remainbyteLength;
             if (_package.CurrentIndex == 0) binLength = 0;
-            var binfileContent =_binInfo.BinConfigFileBytes.SubArray(startIndex, binLength);
+            var binfileContent = _binInfo.BinConfigFileBytes.SubArray(startIndex, binLength);
             DownloadProgress = (double)startIndex / _binInfo.BinConfigFileLength * 100.0;
             return _package.NextPackage(binfileContent);
         }
@@ -117,6 +119,7 @@ namespace FirmwareDownloaderHelper
                 return;
             }
             DownloadSender.Send(sendBytes);
+            _lastSendPayloadData = _package.PayloadData;
         }
 
         private void SendSuccessed(DownloadSenderSendEventArgs e)
@@ -160,6 +163,13 @@ namespace FirmwareDownloaderHelper
                         Message = $"数据下载错误，错误信息：{e.Package.Description}。"
                     });
                 }
+                else if (!CheckPayloadDataContent(e.Package, out var msg))
+                {
+                    DownloadInterrupt(new DownloadInterruptedEventArgs
+                    {
+                        Message = msg
+                    });
+                }
                 else
                 {
                     _lastReceivedPackage = e.Package;
@@ -173,6 +183,49 @@ namespace FirmwareDownloaderHelper
                     Message = $"接收到错误的协议包数据，错误原因：{e.Package.PackageStatus}，数据包：{e.Package.DecodeBuffer.ToHexString()}"
                 });
             }
+        }
+
+        private bool CheckPayloadDataContent(FirmwareUpdatePackage package, out string message)
+        {
+            message = string.Empty;
+            if (package == null) return true;
+            if (package.PayloadData[0] != _lastSendPayloadData[0])
+            {
+                message = "文件发起者ID不匹配。";
+                return false;
+            }
+            if (package.PayloadData[0] != _lastSendPayloadData[0])
+            {
+                message = "文件接收者ID不匹配。";
+                return false;
+            }
+            if (!package.PayloadData.SubArray(2, 2).SequenceEqual(_lastSendPayloadData.SubArray(2, 2)))
+            {
+                message = "当前包号不匹配。";
+                return false;
+            }
+            if (!package.PayloadData.SubArray(4, 2).SequenceEqual(_lastSendPayloadData.SubArray(4, 2)))
+            {
+                message = "总包号不匹配。";
+                return false;
+            }
+            if (!package.PayloadData.SubArray(6, 2).SequenceEqual(_lastSendPayloadData.SubArray(6, 2)))
+            {
+                message = "本包固件长度不匹配。";
+                return false;
+            }
+            if (!package.PayloadData.SubArray(8, 4).SequenceEqual(_lastSendPayloadData.SubArray(8, 4)))
+            {
+                message = "固件文件总长度不匹配。";
+                return false;
+            }
+            if (!package.PayloadData.SubArray(12, 2).SequenceEqual(_lastSendPayloadData.SubArray(12, 2)))
+            {
+                message = "超时时间不匹配。";
+                return false;
+            }
+
+            return true;
         }
 
         private void DownloadInterrupt(DownloadInterruptedEventArgs e)
