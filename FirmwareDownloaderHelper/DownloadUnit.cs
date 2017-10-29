@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using FirmwareDownloaderHelper.DownloadSender;
 
@@ -34,9 +35,9 @@ namespace FirmwareDownloaderHelper
 
         public event DownloadFinished DownloadFinished;
 
-        public DownloadUnit(BinInfo[] binfileInfos, IDownloadSender downloadSender)
+        public DownloadUnit(IReadOnlyCollection<BinInfo> binfileInfos, IDownloadSender downloadSender)
         {
-            _packageHelpers = new PackageHelper[binfileInfos.Length];
+            _packageHelpers = new PackageHelper[binfileInfos.Count];
             var index = 0;
             foreach (var binInfo in binfileInfos)
             {

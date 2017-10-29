@@ -24,7 +24,7 @@ namespace WDTech_Firmware_Serial_Loader
             base.OnStartup(e);
         }
 
-        private bool Init()
+        private static bool Init()
         {
             try
             {

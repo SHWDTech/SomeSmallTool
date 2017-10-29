@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -56,13 +57,7 @@ namespace WDTech_Firmware_Serial_Loader
             CmbStopBit.SelectedIndex = 0;
             CmbParity.SelectedIndex = 0;
             RefreshSystemSerialPortList();
-            _messageTimer.Elapsed += (sender, args) =>
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    LblMessage.Content = _messageBarMessage;
-                });
-            };
+            _messageTimer.Elapsed += (sender, args) => Dispatcher.Invoke(() => LblMessage.Content = _messageBarMessage);
             _messageTimer.Start();
         }
 
@@ -114,7 +109,7 @@ namespace WDTech_Firmware_Serial_Loader
                     }
                     else
                     {
-                        _messageBarMessage = @"BIN文件解析失败，选择了错误的文件，或已经被破坏。";
+                        _messageBarMessage = "BIN文件解析失败，选择了错误的文件，或已经被破坏。";
                         return;
                     }
                 }
@@ -128,20 +123,20 @@ namespace WDTech_Firmware_Serial_Loader
             SelectedBinFileTabControl.Items.Clear();
             _loadedBinFiles.Clear();
             TxtSelectBinFileName.Text = string.Empty;
-            _messageBarMessage = @"清空已选文件。";
+            _messageBarMessage = "清空已选文件。";
         }
 
         private void SendCurrentBinFile(object sender, RoutedEventArgs e)
         {
             if (!_portHelper.SerialPortIsOpen)
             {
-                _messageBarMessage = @"串口还没有打开！";
+                _messageBarMessage = "串口还没有打开！";
                 return;
             }
             var binViewer = SelectedBinFileTabControl.SelectedContent;
             if (binViewer == null)
             {
-                _messageBarMessage = @"当前没有选中的BIN文件。";
+                _messageBarMessage = "当前没有选中的BIN文件。";
                 return;
             }
             var binFileInfo = (BinFileInfomation)((BinViewer)binViewer).DataContext;
@@ -153,7 +148,7 @@ namespace WDTech_Firmware_Serial_Loader
         {
             if (!_portHelper.SerialPortIsOpen)
             {
-                _messageBarMessage = @"串口还没有打开！";
+                _messageBarMessage = "串口还没有打开！";
                 return;
             }
             var selectedFileNames = (from object item in LbLoadedBinFile.Items
@@ -166,7 +161,7 @@ namespace WDTech_Firmware_Serial_Loader
                 .Where(v => selectedFileNames.Contains(v.FilePath)).ToArray();
             if (fileInfos.Length <= 0)
             {
-                _messageBarMessage = @"当前没有选中的BIN文件。";
+                _messageBarMessage = "当前没有选中的BIN文件。";
                 return;
             }
             var processControl = GetDownloadProcesser(fileInfos);
@@ -206,7 +201,7 @@ namespace WDTech_Firmware_Serial_Loader
                 Dispatcher.Invoke(() =>
                 {
                     BarTotalDownloadProgress.Value = BarCurrentDownloadProgress.Value = 100;
-                    _messageBarMessage = @"下载完成。";
+                    _messageBarMessage = "下载完成。";
                     MessageBox.Show(e.Message, "系统信息", MessageBoxButton.OK, MessageBoxImage.Information);
                     BtnSwitchSerialPortStatus.IsEnabled = true;
                     UpdateDownloadBtnStatus(true);
@@ -218,7 +213,7 @@ namespace WDTech_Firmware_Serial_Loader
                 updateTimer.Dispose();
                 Dispatcher.Invoke(() =>
                 {
-                    _messageBarMessage = @"下载已中断。";
+                    _messageBarMessage = "下载已中断。";
                     MessageBox.Show(e.Message, "系统信息", MessageBoxButton.OK, MessageBoxImage.Warning);
                     BtnSwitchSerialPortStatus.IsEnabled = true;
                     UpdateDownloadBtnStatus(true);
@@ -226,7 +221,7 @@ namespace WDTech_Firmware_Serial_Loader
             };
 
             control.StartProcess();
-            _messageBarMessage = @"开始文件下载.";
+            _messageBarMessage = "开始文件下载.";
             UpdateDownloadBtnStatus(false);
         }
 
@@ -235,7 +230,7 @@ namespace WDTech_Firmware_Serial_Loader
             BtnSendCurrentBinFile.IsEnabled = BtnSendSelectedBinFile.IsEnabled = status;
         }
 
-        private DownloadProcessControl GetDownloadProcesser(BinFileInfomation[] infos)
+        private DownloadProcessControl GetDownloadProcesser(IEnumerable<BinFileInfomation> infos)
         {
             var binInfos = infos.Select(i => new BinInfo
             {
@@ -270,13 +265,13 @@ namespace WDTech_Firmware_Serial_Loader
                         , (Parity)CmbParity.SelectedValue);
                     if (_portHelper.SerialPortIsOpen)
                     {
-                        BtnSwitchSerialPortStatus.Content = @"关闭串口";
-                        _messageBarMessage = @"串口已经打开";
+                        BtnSwitchSerialPortStatus.Content = "关闭串口";
+                        _messageBarMessage = "串口已经打开";
                     }
                     else
                     {
                         LockSerialPortParamControls(true);
-                        _messageBarMessage = @"串口打开失败，请检查是否被占用";
+                        _messageBarMessage = "串口打开失败，请检查是否被占用";
                     }
                 });
             }
@@ -287,9 +282,9 @@ namespace WDTech_Firmware_Serial_Loader
                     _portHelper.CloseSerialPort();
                     if (!_portHelper.SerialPortIsOpen)
                     {
-                        BtnSwitchSerialPortStatus.Content = @"打开串口";
+                        BtnSwitchSerialPortStatus.Content = "打开串口";
                         LockSerialPortParamControls(true);
-                        _messageBarMessage = @"串口已经关闭";
+                        _messageBarMessage = "串口已经关闭";
                     }
                 });
             }

@@ -3,9 +3,9 @@ using System.Linq;
 
 namespace FirmwareDownloaderHelper
 {
-    public class BinFileOptionsHelper
+    public static class BinFileOptionsHelper
     {
-        public static void UpdateConfigDicts(List<ConfigDict> configs) => _binFileConfigDicts = configs; 
+        public static void UpdateConfigDicts(List<ConfigDict> configs) => _binFileConfigDicts = configs;
 
         private static List<ConfigDict> _binFileConfigDicts;
 

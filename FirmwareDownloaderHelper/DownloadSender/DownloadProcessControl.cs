@@ -45,7 +45,6 @@ namespace FirmwareDownloaderHelper.DownloadSender
             TotalFileDownloadMissions = binfileInfos.Length;
             _downloadUnints = new DownloadUnit[1];
             _downloadUnints[0] = new DownloadUnit(binfileInfos, downloadSender);
-
         }
 
         public DownloadProcessControl(BinInfo[] binfileInfos, List<IDownloadSender> downloadSenders)
@@ -91,10 +90,7 @@ namespace FirmwareDownloaderHelper.DownloadSender
                     StartProcess();
                 }
             };
-            _onProcessUnit.DownloadFinished += (e) =>
-            {
-                StartProcess();
-            };
+            _onProcessUnit.DownloadFinished += (e) => StartProcess();
             _onProcessUnit.StartDownload();
             _currentUnitIndex++;
         }

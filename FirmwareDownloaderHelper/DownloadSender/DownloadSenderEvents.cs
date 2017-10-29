@@ -2,7 +2,6 @@
 
 namespace FirmwareDownloaderHelper.DownloadSender
 {
-
     public delegate void SendSuccess(DownloadSenderSendEventArgs e);
 
     public delegate void SendFailed(DownloadSenderSendEventArgs e);
@@ -11,7 +10,6 @@ namespace FirmwareDownloaderHelper.DownloadSender
 
     public class DownloadSenderEventArgs : EventArgs
     {
-
     }
 
     public class DownloadSenderSendEventArgs : DownloadSenderEventArgs

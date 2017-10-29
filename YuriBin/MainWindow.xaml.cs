@@ -170,10 +170,10 @@ namespace YuriBin
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(TxtVersionCodeFirst.Text) ||
-                string.IsNullOrWhiteSpace(TxtVersionCodeSecond.Text) ||
-                string.IsNullOrWhiteSpace(TxtVersionCodeThird.Text) ||
-                string.IsNullOrWhiteSpace(TxtVersionCodeFourth.Text))
+            if (string.IsNullOrWhiteSpace(TxtVersionCodeFirst.Text)
+                || string.IsNullOrWhiteSpace(TxtVersionCodeSecond.Text)
+                || string.IsNullOrWhiteSpace(TxtVersionCodeThird.Text)
+                || string.IsNullOrWhiteSpace(TxtVersionCodeFourth.Text))
             {
                 _checkMessage = "SA KA MO DO呢？";
                 LblMessage.Content = "版本信息有误。";
@@ -204,16 +204,14 @@ namespace YuriBin
             LblMessage.Content = "文件写入成功。";
         }
 
-        private void JumpToNext(object sender, KeyEventArgs e)
+        private static void JumpToNext(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Decimal)
-            {
-                var tRequest = new TraversalRequest(FocusNavigationDirection.Next);
-                var keyboardFocus = Keyboard.FocusedElement as UIElement;
+            if (e.Key != Key.Decimal) return;
+            var tRequest = new TraversalRequest(FocusNavigationDirection.Next);
+            var keyboardFocus = Keyboard.FocusedElement as UIElement;
 
-                keyboardFocus?.MoveFocus(tRequest);
-                e.Handled = true;
-            }
+            keyboardFocus?.MoveFocus(tRequest);
+            e.Handled = true;
         }
 
         private static byte[] PopDescriptionBytes()

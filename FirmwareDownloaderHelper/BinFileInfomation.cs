@@ -26,10 +26,9 @@ namespace FirmwareDownloaderHelper
 
         private BinFileInfomation()
         {
-            
         }
 
-        public string TargetObjectString => BinFileOptionsHelper.GetUpdateTarget(TargetObject.ToString()); 
+        public string TargetObjectString => BinFileOptionsHelper.GetUpdateTarget(TargetObject.ToString());
 
         public string FilePath { get; set; }
 
