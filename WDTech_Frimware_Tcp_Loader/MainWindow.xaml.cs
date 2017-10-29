@@ -64,6 +64,13 @@ namespace WDTech_Frimware_Tcp_Loader
                     }
                 });
             };
+            _socketServer.ServerClosed += () =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    _connectedClients.Clear();
+                });
+            };
         }
 
         private static string GetLocalIpAddress()
@@ -106,6 +113,7 @@ namespace WDTech_Frimware_Tcp_Loader
         private void SwitchServerButton()
         {
             BtnStartServer.Content = _isServerStarted ? "停止监听" : "开始监听";
+            TxtLocalServerIpAddress.IsEnabled = TxtLocalServerPort.IsEnabled = !_isServerStarted;
         }
 
         private bool TryParseIpEndPoint(out IPEndPoint endPoint)
@@ -241,6 +249,7 @@ namespace WDTech_Frimware_Tcp_Loader
                     LblMessage.Content = @"下载完成。";
                     MessageBox.Show(e.Message, "系统信息", MessageBoxButton.OK, MessageBoxImage.Information);
                     BtnStartServer.IsEnabled = true;
+                    UpdateDownloadBtnStatus(true);
                 });
             };
             control.ProcessInterrupted += (e) =>
@@ -252,11 +261,13 @@ namespace WDTech_Frimware_Tcp_Loader
                     LblMessage.Content = @"下载已中断。";
                     MessageBox.Show(e.Message, "系统信息", MessageBoxButton.OK, MessageBoxImage.Warning);
                     BtnStartServer.IsEnabled = true;
+                    UpdateDownloadBtnStatus(true);
                 });
             };
 
             control.StartProcess();
             LblMessage.Content = @"开始文件下载。";
+            UpdateDownloadBtnStatus(false);
         }
 
         private DownloadProcessControl GetDownloadProcesser(BinFileInfomation[] infos)
@@ -265,12 +276,19 @@ namespace WDTech_Frimware_Tcp_Loader
             {
                 BinConfigFileFullPathWithName = i.FilePath,
                 BinConfigFileBytes = File.ReadAllBytes(i.FilePath),
+                BinConfigFileLength = (uint)new FileInfo(i.FilePath).Length,
                 BinFileLength = (uint)new FileInfo(i.FilePath).Length,
                 PackageBinLength = DownloadConfigs.PackageBinFileLength,
-                TimeOut = DownloadConfigs.TimeOut
+                TimeOut = DownloadConfigs.TimeOut,
+                TargetObject = i.TargetObject
             }).ToArray();
 
             return new DownloadProcessControl(binInfos, GetDownloadSenders());
+        }
+
+        private void UpdateDownloadBtnStatus(bool status)
+        {
+            BtnSendCurrentBinFile.IsEnabled = BtnSendSelectedBinFile.IsEnabled = status;
         }
 
         private List<IDownloadSender> GetDownloadSenders()

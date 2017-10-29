@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using FirmwareDownloaderHelper;
 using FirmwareDownloaderHelper.DownloadSender;
+using FirmwareDownloaderHelper.Extensions;
 
 namespace WDTech_Frimware_Tcp_Loader.Helper
 {
@@ -20,8 +22,9 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
                 for (var i = 0; i < e.BytesTransferred; i++)
                 {
                     readBytes[i] = e.Buffer[i];
-                    _buffer.AddRange(readBytes);
                 }
+                _buffer.AddRange(readBytes);
+                Debug.WriteLine($"Receive Bytes:{readBytes.ToHexString()}");
                 var package = DecodePackage();
                 Received?.Invoke(new DownloadSenderReceivedArgs
                 {
@@ -55,22 +58,23 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
         {
             var package = new FirmwareUpdatePackage();
             package.DecodeFrame(_buffer.ToArray());
-            if (package.PackageStatus == PackageStatus.InvalidHead)
+            Debug.WriteLine(package.PackageStatus);
+            while (true)
             {
+                if (package.PackageStatus == PackageStatus.BufferHaveNoEnoughLength) break;
+                if (package.PackageStatus == PackageStatus.DecodeCompleted)
+                {
+                    _buffer.RemoveRange(0, package.PackageLength);
+                    break;
+                }
                 if (_buffer.Count > 0)
                 {
                     _buffer.RemoveAt(0);
                 }
-                DecodePackage();
+                package.DecodeFrame(_buffer.ToArray());
+                Debug.WriteLine(package.PackageStatus);
             }
-            else if (package.PackageStatus == PackageStatus.BufferHaveNoEnoughLength)
-            {
-                return package;
-            }
-            else if (package.PackageStatus != PackageStatus.DecodeCompleted)
-            {
-                _buffer.Clear();
-            }
+
             return package;
         }
 

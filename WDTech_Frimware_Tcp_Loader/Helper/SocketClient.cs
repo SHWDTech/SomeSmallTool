@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 
 namespace WDTech_Frimware_Tcp_Loader.Helper
 {
     public delegate void TcpDataReceived(SocketClientReceiveEventArgs args);
 
     public delegate void Disconnected(SocketClientDisconnectedArgs args);
+
+    public delegate void ServerClosed();
 
     public class SocketClientEventArgs
     {

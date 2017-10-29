@@ -18,6 +18,8 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
 
         public event Disconnected ClientDisconnected;
 
+        public event ServerClosed ServerClosed;
+
         public bool StartServer(IPEndPoint serverEndPoint)
         {
             _serverSocket?.Dispose();
@@ -26,8 +28,8 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
             {
                 _serverSocket.Bind(serverEndPoint);
                 _serverSocket.Listen(4096);
-                StartAccept(null);
                 _isServerDisposed = false;
+                StartAccept(null);
             }
             catch (Exception ex)
             {
@@ -42,8 +44,10 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
         {
             try
             {
+                _serverSocket.Close();
                 _serverSocket.Dispose();
                 _isServerDisposed = true;
+                OnServerClosed();
             }
             catch (Exception)
             {
@@ -100,6 +104,11 @@ namespace WDTech_Frimware_Tcp_Loader.Helper
         private void OnClientDisconnected(SocketClientDisconnectedArgs args)
         {
             ClientDisconnected?.Invoke(args);
+        }
+
+        private void OnServerClosed()
+        {
+            ServerClosed?.Invoke();
         }
     }
 }
