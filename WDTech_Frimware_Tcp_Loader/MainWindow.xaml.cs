@@ -32,6 +32,8 @@ namespace WDTech_Frimware_Tcp_Loader
 
         private bool _isServerStarted;
 
+        private Timer _updateTimer;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -215,12 +217,12 @@ namespace WDTech_Frimware_Tcp_Loader
 
         private void StartDownloadProcess(DownloadProcessControl control)
         {
-            var updateTimer = new Timer
+            _updateTimer = new Timer
             {
                 Interval = 100,
                 Enabled = true
             };
-            updateTimer.Elapsed += (sender, e) =>
+            _updateTimer.Elapsed += (sender, e) =>
             {
                 Dispatcher.Invoke(() =>
                 {
@@ -237,12 +239,12 @@ namespace WDTech_Frimware_Tcp_Loader
                     BarTotalDownloadProgress.Value = control.TotalProgress ?? 0;
                 });
             };
-            updateTimer.Start();
+            _updateTimer.Start();
             BtnStartServer.IsEnabled = false;
             control.ProcessFinished += (e) =>
             {
-                updateTimer.Stop();
-                updateTimer.Dispose();
+                _updateTimer.Stop();
+                _updateTimer.Dispose();
                 Dispatcher.Invoke(() =>
                 {
                     BarTotalDownloadProgress.Value = 100;
@@ -254,20 +256,25 @@ namespace WDTech_Frimware_Tcp_Loader
             };
             control.ProcessInterrupted += (e) =>
             {
-                updateTimer.Stop();
-                updateTimer.Dispose();
-                Dispatcher.Invoke(() =>
-                {
-                    LblMessage.Content = @"下载已中断。";
-                    MessageBox.Show(e.Message, "系统信息", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    BtnStartServer.IsEnabled = true;
-                    UpdateDownloadBtnStatus(true);
-                });
+                DownloadInterrupted(e);
             };
 
             control.StartProcess();
             LblMessage.Content = @"开始文件下载。";
             UpdateDownloadBtnStatus(false);
+        }
+
+        private void DownloadInterrupted(DownloadProcessControlEventArgs e)
+        {
+            _updateTimer.Stop();
+            _updateTimer.Dispose();
+            Dispatcher.Invoke(() =>
+            {
+                LblMessage.Content = @"下载已中断。";
+                MessageBox.Show(e.Message, "系统信息", MessageBoxButton.OK, MessageBoxImage.Warning);
+                BtnStartServer.IsEnabled = true;
+                UpdateDownloadBtnStatus(true);
+            });
         }
 
         private DownloadProcessControl GetDownloadProcesser(BinFileInfomation[] infos)
